@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -29,7 +29,8 @@ export class Login implements OnInit, OnDestroy {
 
   constructor(
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -59,9 +60,11 @@ export class Login implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
+    console.log('Starting login process, isLoading:', this.isLoading);
 
     this.auth.login(this.email, this.password).subscribe({
       next: (res) => {
+        console.log('Login success handler called');
         const role: string = res.user.role;
 
         // Handle remember me functionality
@@ -95,9 +98,47 @@ export class Login implements OnInit, OnDestroy {
         }, 1000);
       },
       error: (err) => {
-        this.isLoading = false;
-        const errorMessage = err.error?.message || 'Invalid email or password';
-        this.showToast('error', 'Authentication Failed', errorMessage);
+        console.log('Error handler called');
+        console.log('isLoading before reset:', this.isLoading);
+        
+        try {
+          // Handle different error scenarios
+          let errorTitle = 'Authentication Failed';
+          let errorMessage = 'Invalid email or password';
+
+          if (err.status === 401) {
+            errorTitle = 'Invalid Credentials';
+            errorMessage = 'The email or password you entered is incorrect. Please try again.';
+          } else if (err.status === 0) {
+            errorTitle = 'Connection Error';
+            errorMessage = 'Unable to connect to the server. Please check your internet connection.';
+          } else if (err.status === 500) {
+            errorTitle = 'Server Error';
+            errorMessage = 'An error occurred on the server. Please try again later.';
+          } else if (err.error?.message) {
+            errorMessage = err.error.message;
+          }
+
+          console.log('Showing toast:', errorTitle, errorMessage);
+          this.showToast('error', errorTitle, errorMessage);
+          
+          console.error('Login error:', {
+            status: err.status,
+            message: err.error?.message || err.message,
+            error: err
+          });
+        } catch (e) {
+          console.error('Exception in error handler:', e);
+        } finally {
+          // ALWAYS reset loading state, even if there's an exception
+          this.isLoading = false;
+          console.log('isLoading after reset:', this.isLoading);
+          // Force change detection
+          this.cdr.detectChanges();
+        }
+      },
+      complete: () => {
+        console.log('Observable complete');
       }
     });
   }
@@ -119,7 +160,7 @@ export class Login implements OnInit, OnDestroy {
       return;
     }
 
-    // Show notification that admin has been contacted
+    // Show notification that admin has been contacted (nzidouha fl backend aussi)
     this.showToast(
       'success',
       'Password Reset Requested',
@@ -127,8 +168,6 @@ export class Login implements OnInit, OnDestroy {
       7000
     );
 
-    // Optionally, make an API call to trigger the actual password reset email
-    // this.auth.requestPasswordReset(this.email).subscribe(...);
   }
 
   private isValidEmail(email: string): boolean {
@@ -142,6 +181,7 @@ export class Login implements OnInit, OnDestroy {
     message: string,
     duration: number = 5000
   ) {
+    console.log('showToast called:', type, title, message);
     const toast: Toast = {
       id: this.toastIdCounter++,
       type,
@@ -150,6 +190,7 @@ export class Login implements OnInit, OnDestroy {
     };
 
     this.toasts.push(toast);
+    console.log('Toasts array:', this.toasts);
 
     // Auto remove after duration
     setTimeout(() => {
