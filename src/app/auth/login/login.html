@@ -18,6 +18,7 @@
             [(ngModel)]="email"
             name="email"
             required
+            [disabled]="isLoading"
           />
         </div>
       </div>
@@ -32,23 +33,45 @@
             [(ngModel)]="password"
             name="password"
             required
+            [disabled]="isLoading"
           />
         </div>
       </div>
 
       <div class="remember-forgot">
         <label>
-          <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
+          <input 
+            type="checkbox" 
+            [(ngModel)]="rememberMe" 
+            name="rememberMe"
+            [disabled]="isLoading"
+          />
           Remember me
         </label>
-        <a href="/forgot-password">Forgot password?</a>
+        <a href="#" (click)="handleForgotPassword($event)">Forgot password?</a>
       </div>
 
-      <button type="submit">Sign in</button>
-
-      @if (error) {
-        <p class="error">{{ error }}</p>
-      }
+      <button type="submit" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Sign in</span>
+        <span *ngIf="isLoading">
+          Signing in
+          <span class="loading"></span>
+        </span>
+      </button>
     </form>
   </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container">
+  @for (toast of toasts; track toast.id) {
+    <div class="toast" [class]="'toast ' + toast.type + (toast.isExiting ? ' toast-exit' : '')">
+      <span class="toast-icon">{{ getToastIcon(toast.type) }}</span>
+      <div class="toast-content">
+        <p class="toast-title">{{ toast.title }}</p>
+        <p class="toast-message">{{ toast.message }}</p>
+      </div>
+      <button class="toast-close" (click)="removeToast(toast.id)">×</button>
+    </div>
+  }
 </div>

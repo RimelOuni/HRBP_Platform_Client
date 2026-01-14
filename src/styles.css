@@ -1,1 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
+@font-face {
+  font-family: 'Roboto';
+  src: url('/assets/Roboto_Condensed-ExtraLight.ttf') format('ttf'),
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
