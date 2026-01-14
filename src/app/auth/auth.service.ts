@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
+import { environment } from '../../environments/environment'; // import environment (dev for now baad fl prod nekhdmou b lekher)
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:5000/api/auth';
+  private readonly API_URL = `${environment.API_URL}/auth`;
   private readonly TOKEN_KEY = 'hrbp_token';
   private readonly USER_KEY = 'hrbp_user';
 
