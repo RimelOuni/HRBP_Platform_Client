@@ -1,0 +1,54 @@
+<div class="login-container">
+  <div class="login-box">
+    <div class="logo">
+      <img src="/assets/teamwill-logo.png" alt="Teamwill Consulting Logo" />
+    </div>
+    
+    <h2>Teamwill Consulting</h2>
+    <p class="subtitle">HRBP Platform - Secure authentication for HR Business Partners</p>
+
+    <form (ngSubmit)="submit()">
+      <div class="input-group">
+        <label>Email Address</label>
+        <div class="input-wrapper">
+          <span class="input-icon">✉</span>
+          <input
+            type="email"
+            placeholder="your.email@teamwillgroup.com"
+            [(ngModel)]="email"
+            name="email"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input
+            type="password"
+            placeholder="Enter your password"
+            [(ngModel)]="password"
+            name="password"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="remember-forgot">
+        <label>
+          <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
+          Remember me
+        </label>
+        <a href="/forgot-password">Forgot password?</a>
+      </div>
+
+      <button type="submit">Sign in</button>
+
+      @if (error) {
+        <p class="error">{{ error }}</p>
+      }
+    </form>
+  </div>
+</div>
