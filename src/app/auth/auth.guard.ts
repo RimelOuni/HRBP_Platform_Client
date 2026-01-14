@@ -2,19 +2,21 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = (route) => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  const roleAllowed = route.data['role'] as string;
+  const user = auth.getUser();
 
-  if (!auth.isLoggedIn()) {
+  if (!auth.isLoggedIn() || !user) {
     router.navigate(['/login']);
     return false;
   }
 
-  if (roleAllowed && auth.getRole() !== roleAllowed) {
-    router.navigate(['/login']);
+  const roleAllowed = route.data?.['role'];
+
+  if (roleAllowed && user.role !== roleAllowed) {
+    router.navigate(['/login']); // later → /403
     return false;
   }
 

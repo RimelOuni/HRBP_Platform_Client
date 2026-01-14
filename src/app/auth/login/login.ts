@@ -26,15 +26,24 @@ export class Login {
 
     this.auth.login(this.email, this.password).subscribe({
       next: (res) => {
-        const role = res.user.role;
+        const role: string = res.user.role;
 
-        if (role === 'ADMIN_RH') {
-          this.router.navigate(['/admin']);
-        } else if (role === 'DIRECTION_RH') {
-          this.router.navigate(['/direction']);
-        } else {
-          this.router.navigate(['/profile']);
+        const roleRouteMap: Record<string, string> = {
+          ADMIN_RH: '/admin',
+          DIRECTION_RH: '/direction',
+          HRBP: '/hrbp',
+          MANAGER: '/manager',
+          COLLABORATOR: '/collab',
+        };
+
+        const route = roleRouteMap[role];
+
+        if (!route) {
+          this.error = 'Unauthorized role';
+          return;
         }
+
+        this.router.navigate([route]);
       },
       error: (err) => {
         this.error = err.error?.message || 'Invalid credentials';
