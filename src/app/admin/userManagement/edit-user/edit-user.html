@@ -1,0 +1,478 @@
+<!-- edit-user.html -->
+<div class="edit-user-wrapper" *ngIf="!loading; else loadingTpl">
+
+  <!-- Header -->
+  <div class="eu-header">
+    <div class="eu-header-left">
+      <button class="back-btn" (click)="goBack()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+      </button>
+      <div>
+        <h1 class="eu-title">Edit User</h1>
+        <p class="eu-subtitle">{{ form.first_name }} {{ form.last_name }}</p>
+      </div>
+    </div>
+    <button class="save-btn" (click)="saveChanges()" [disabled]="saving">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      {{ saving ? 'Saving...' : 'Save Changes' }}
+    </button>
+  </div>
+
+  <!-- Toast Messages -->
+  <div class="toast toast-success" *ngIf="successMsg">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    {{ successMsg }}
+  </div>
+  <div class="toast toast-error" *ngIf="errorMsg">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+    </svg>
+    {{ errorMsg }}
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn" [class.active]="activeTab === 'personal'" (click)="setTab('personal')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+      Personal Info
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'professional'" (click)="setTab('professional')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+      </svg>
+      Professional
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'relations'" (click)="setTab('relations')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      Relations
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'status'" (click)="setTab('status')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      Status & Security
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+
+    <!-- ── PERSONAL INFO ── -->
+    <div *ngIf="activeTab === 'personal'" class="tab-panel">
+      <div class="panel-header">
+        <h2>Personal Information</h2>
+        <p>Basic user information and contact details</p>
+      </div>
+
+      <!-- Avatar -->
+      <div class="avatar-row">
+        <div class="avatar-circle">
+          <img *ngIf="form.photo_url" [src]="form.photo_url" alt="avatar" />
+          <span *ngIf="!form.photo_url">{{ userInitials }}</span>
+        </div>
+        <div class="avatar-actions">
+          <input
+            type="file"
+            #fileInput
+            accept="image/jpeg,image/png,image/gif"
+            style="display:none"
+            (change)="onPhotoSelected($event)"
+          />
+          <button class="upload-btn" (click)="fileInput.click()" [disabled]="uploadingPhoto">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+            </svg>
+            {{ uploadingPhoto ? 'Uploading...' : 'Upload Photo' }}
+          </button>
+          <button *ngIf="form.photo_url" class="remove-photo-btn" (click)="removePhoto()">Remove</button>
+          <span class="upload-hint">JPG, PNG or GIF, max 2MB</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field-group">
+          <label>First Name</label>
+          <input type="text" [(ngModel)]="form.first_name" placeholder="First name" />
+        </div>
+        <div class="field-group">
+          <label>Last Name</label>
+          <input type="text" [(ngModel)]="form.last_name" placeholder="Last name" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Email Address</label>
+        <input type="email" [(ngModel)]="form.email" placeholder="email@company.com" />
+      </div>
+
+      <div class="field-group">
+        <label>Phone Number</label>
+        <input type="tel" [(ngModel)]="form.phone" placeholder="+216 XX XX XX XX" />
+      </div>
+    </div>
+
+    <!-- ── PROFESSIONAL ── -->
+    <div *ngIf="activeTab === 'professional'" class="tab-panel">
+      <div class="panel-header">
+        <h2>Professional Information</h2>
+        <p>Job-related details, practice and project assignment</p>
+      </div>
+
+      <!-- Role -->
+      <div class="field-group">
+        <label>Role</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="form.role">
+            <option value="" disabled>Select role</option>
+            <option *ngFor="let r of roles" [value]="r">{{ formatRole(r) }}</option>
+          </select>
+          <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Practices multi-select -->
+      <div class="field-group">
+        <label>Practices</label>
+        <div class="dropdown-wrapper multi-select">
+          <div class="dropdown-trigger" (click)="togglePracticeDropdown($event)">
+            <span class="dropdown-value" [class.placeholder]="form.practice_ids.length === 0">
+              {{ form.practice_ids.length > 0 ? selectedPracticesDisplay : 'Select practices' }}
+            </span>
+            <div class="dropdown-icons">
+              <button *ngIf="form.practice_ids.length > 0" class="clear-btn" (click)="clearAllPractices($event)" title="Clear all">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+              <svg class="chevron" [class.open]="practiceDropdownOpen" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="dropdown-menu" *ngIf="practiceDropdownOpen" (click)="$event.stopPropagation()">
+            <div class="dropdown-list multi-list">
+              <div *ngIf="practices.length === 0" class="dropdown-empty">No practices found</div>
+              <div
+                *ngFor="let p of practices"
+                class="dropdown-item multi-item"
+                [class.selected]="isPracticeSelected(p._id)"
+                (click)="togglePractice(p._id)">
+                <div class="checkbox">
+                  <svg *ngIf="isPracticeSelected(p._id)" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <div class="practice-info">
+                  <span class="practice-name">{{ p.name }}</span>
+                  <span class="practice-desc" *ngIf="p.description">{{ p.description }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="field-hint" *ngIf="form.practice_ids.length > 0">
+          {{ form.practice_ids.length }} practice(s) selected
+        </span>
+      </div>
+
+      <!-- Grade -->
+      <div class="field-group">
+        <label>Grade</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="form.grade">
+            <option value="" disabled>Select grade</option>
+            <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+          </select>
+          <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PROJECT ASSIGNMENT SECTION
+      ══════════════════════════════════════ -->
+      <div class="assignment-section">
+        <div class="assignment-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <path d="M8 21h8M12 17v4"/>
+          </svg>
+          <span>Project Assignment</span>
+        </div>
+
+        <!-- No practices selected hint -->
+        <div *ngIf="form.practice_ids.length === 0" class="assignment-hint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          Select one or more practices above to assign a project.
+        </div>
+
+        <!-- Loading spinner -->
+        <div *ngIf="loadingProjects" class="projects-loading">
+          <div class="spinner-sm"></div>
+          <span>Loading projects...</span>
+        </div>
+
+        <!-- Project select (shown once practices selected and loaded) -->
+        <ng-container *ngIf="hasProjectsToShow">
+
+          <!-- Project grouped dropdown -->
+          <div class="field-group">
+            <label>Project</label>
+            <div class="select-wrapper">
+              <select [(ngModel)]="form.project_id" (change)="onProjectChange()">
+                <option value="">— No project (Intercontrat) —</option>
+                <ng-container *ngFor="let group of projectGroups">
+                  <!-- optgroup per practice -->
+                  <optgroup [label]="group.practiceName">
+                    <option *ngFor="let proj of group.projects" [value]="proj._id">
+                      {{ proj.name }}
+                      <ng-container *ngIf="proj.status !== 'ACTIVE'"> ({{ getStatusLabel(proj.status) }})</ng-container>
+                    </option>
+                  </optgroup>
+                </ng-container>
+              </select>
+              <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+            <span class="field-hint" *ngIf="projectGroups.length === 0">
+              No projects found for the selected practices.
+            </span>
+          </div>
+
+          <!-- Assignment type chips -->
+          <div class="field-group">
+            <label>Assignment Type</label>
+            <div class="assignment-chips">
+              <button
+                type="button"
+                class="chip"
+                [class.chip-affecte]="form.assignment_type === 'AFFECTE'"
+                [class.chip-active]="form.assignment_type === 'AFFECTE'"
+                (click)="setAssignmentType('AFFECTE')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Affecté
+              </button>
+
+              <button
+                type="button"
+                class="chip"
+                [class.chip-intercontrat]="form.assignment_type === 'INTERCONTRAT'"
+                [class.chip-active]="form.assignment_type === 'INTERCONTRAT'"
+                (click)="setAssignmentType('INTERCONTRAT')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Intercontrat
+              </button>
+
+              <button
+                *ngIf="form.assignment_type || form.project_id"
+                type="button"
+                class="chip chip-clear"
+                (click)="clearAssignment()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <!-- Current assignment summary badge -->
+          <div class="assignment-summary" *ngIf="form.assignment_type || form.project_id">
+            <span
+              class="summary-badge"
+              [ngClass]="form.assignment_type === 'AFFECTE' ? 'badge-affecte' : form.assignment_type === 'INTERCONTRAT' ? 'badge-intercontrat' : 'badge-none'">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="5"/>
+              </svg>
+              <ng-container *ngIf="form.assignment_type === 'AFFECTE'">Affecté</ng-container>
+              <ng-container *ngIf="form.assignment_type === 'INTERCONTRAT'">Intercontrat</ng-container>
+              <ng-container *ngIf="!form.assignment_type">No type set</ng-container>
+            </span>
+            <span class="summary-text" *ngIf="form.project_id">
+              on <strong>{{ getSelectedProjectName() }}</strong>
+            </span>
+            <span class="summary-text" *ngIf="!form.project_id">
+              — no project assigned
+            </span>
+          </div>
+
+        </ng-container>
+      </div>
+      <!-- ══ end project assignment ══ -->
+
+    </div>
+
+    <!-- ── RELATIONS ── -->
+    <div *ngIf="activeTab === 'relations'" class="tab-panel">
+      <div class="panel-header">
+        <h2>Professional Relations</h2>
+        <p>Reporting and career counseling relationships</p>
+      </div>
+
+      <!-- RO Searchable Dropdown -->
+      <div class="field-group">
+        <label>Operational Responsible (RO)</label>
+        <div class="dropdown-wrapper">
+          <div class="dropdown-trigger" (click)="toggleRoDropdown($event)">
+            <span class="dropdown-value" [class.placeholder]="!form.ro_id">
+              {{ selectedRoDisplay || 'Select Operational Responsible' }}
+            </span>
+            <div class="dropdown-icons">
+              <button *ngIf="form.ro_id" class="clear-btn" (click)="clearRo($event)" title="Clear">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+              <svg class="chevron" [class.open]="roDropdownOpen" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+          <div class="dropdown-menu" *ngIf="roDropdownOpen" (click)="$event.stopPropagation()">
+            <div class="dropdown-search">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" [(ngModel)]="roSearch" placeholder="Search by name or role..." (click)="$event.stopPropagation()" autofocus />
+            </div>
+            <div class="dropdown-list">
+              <div *ngIf="filteredRoUsers.length === 0" class="dropdown-empty">No users found</div>
+              <div
+                *ngFor="let u of filteredRoUsers"
+                class="dropdown-item"
+                [class.selected]="form.ro_id === u._id"
+                (click)="selectRo(u)">
+                <div class="user-avatar-sm">{{ u.first_name.charAt(0) + u.last_name.charAt(0) }}</div>
+                <div class="user-info">
+                  <span class="user-name">{{ u.first_name }} {{ u.last_name }}</span>
+                  <span class="user-email">{{ u.email }}</span>
+                </div>
+                <span class="role-badge" [ngClass]="getRoleBadgeClass(u.role)">{{ formatRole(u.role) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CC Searchable Dropdown -->
+      <div class="field-group">
+        <label>Career Counselor (CC)</label>
+        <div class="dropdown-wrapper">
+          <div class="dropdown-trigger" (click)="toggleCcDropdown($event)">
+            <span class="dropdown-value" [class.placeholder]="!form.cc_id">
+              {{ selectedCcDisplay || 'Select Career Counselor' }}
+            </span>
+            <div class="dropdown-icons">
+              <button *ngIf="form.cc_id" class="clear-btn" (click)="clearCc($event)" title="Clear">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+              <svg class="chevron" [class.open]="ccDropdownOpen" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+          <div class="dropdown-menu" *ngIf="ccDropdownOpen" (click)="$event.stopPropagation()">
+            <div class="dropdown-search">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" [(ngModel)]="ccSearch" placeholder="Search by name or role..." (click)="$event.stopPropagation()" autofocus />
+            </div>
+            <div class="dropdown-list">
+              <div *ngIf="filteredCcUsers.length === 0" class="dropdown-empty">No users found</div>
+              <div
+                *ngFor="let u of filteredCcUsers"
+                class="dropdown-item"
+                [class.selected]="form.cc_id === u._id"
+                (click)="selectCc(u)">
+                <div class="user-avatar-sm">{{ u.first_name.charAt(0) + u.last_name.charAt(0) }}</div>
+                <div class="user-info">
+                  <span class="user-name">{{ u.first_name }} {{ u.last_name }}</span>
+                  <span class="user-email">{{ u.email }}</span>
+                </div>
+                <span class="role-badge" [ngClass]="getRoleBadgeClass(u.role)">{{ formatRole(u.role) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STATUS & SECURITY ── -->
+    <div *ngIf="activeTab === 'status'" class="tab-panel">
+      <div class="panel-header">
+        <h2>Status & Security</h2>
+        <p>Account status and security settings</p>
+      </div>
+
+      <div class="status-card">
+        <div class="status-card-info">
+          <strong>Active Status</strong>
+          <span>Control user access to the platform</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [(ngModel)]="form.is_active" (change)="toggleStatus()" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="meta-card">
+        <div class="meta-row">
+          <div class="meta-label">Last Login</div>
+          <div class="meta-value">{{ formatDate(user?.last_login) }}</div>
+        </div>
+        <div class="meta-row">
+          <div class="meta-label">Account Created</div>
+          <div class="meta-value">{{ formatDate(user?.createdAt) }}</div>
+        </div>
+        <div class="meta-row">
+          <div class="meta-label">Last Updated</div>
+          <div class="meta-value">{{ formatDate(user?.updatedAt) }}</div>
+        </div>
+      </div>
+
+      <button class="reset-pwd-btn" (click)="resetPassword()">Reset Password</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Loading -->
+<ng-template #loadingTpl>
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading user data...</p>
+  </div>
+</ng-template>

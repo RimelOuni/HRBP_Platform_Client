@@ -1,0 +1,217 @@
+<!-- src/app/hrbp/hrbp.html -->
+<div class="app-wrapper">
+
+  <!-- ═══════════ HEADER ═══════════ -->
+  <header class="app-header">
+    <div class="header-inner">
+
+      <div class="header-left">
+        <button class="toggle-btn" (click)="toggleSidebar()"
+                [attr.aria-label]="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect x="2"  y="3.5"  width="14" height="1.8" rx="0.9" fill="currentColor"/>
+            <rect x="2"  y="8.1"  width="9"  height="1.8" rx="0.9" fill="currentColor"/>
+            <rect x="2"  y="12.7" width="14" height="1.8" rx="0.9" fill="currentColor"/>
+          </svg>
+        </button>
+        <img src="assets/logo-teamwill2.png" alt="Teamwill" class="header-logo">
+      </div>
+
+      <div class="header-right">
+        <button class="notif-btn" title="Notifications" (click)="toggleNotifications()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span class="notif-dot" *ngIf="hasNotifications"></span>
+        </button>
+
+        <div class="header-user"
+             [routerLink]="['/hrbp/SelfProfile', currentUserId]"
+             title="My Profile">
+          <div class="user-meta">
+            <span class="user-name">{{ userName }}</span>
+            <span class="user-role-tag">HRBP</span>
+          </div>
+          <div class="user-avatar" [title]="userName">
+            <img *ngIf="userPhotoUrl" [src]="userPhotoUrl" [alt]="userName" class="user-avatar-img"/>
+            <span *ngIf="!userPhotoUrl">{{ userInitials }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════ BODY ═══════════ -->
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar" [class.collapsed]="isSidebarCollapsed">
+
+      <nav class="sidebar-nav">
+
+        <!-- Calendar -->
+<a routerLink="/hrbp/calendar"
+   routerLinkActive="active"
+   class="nav-link"
+   [title]="isSidebarCollapsed ? 'Calendrier' : ''">
+  <span class="nav-icon">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect x="2" y="4" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M6 2v4M14 2v4M2 9h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="7" cy="13" r="1" fill="currentColor"/>
+      <circle cx="10" cy="13" r="1" fill="currentColor"/>
+      <circle cx="13" cy="13" r="1" fill="currentColor"/>
+    </svg>
+  </span>
+  <span class="nav-label">Calendrier</span>
+</a>
+
+
+        <!-- Collaborators -->
+        <a routerLink="/hrbp/collaborators" routerLinkActive="active" class="nav-link"
+           [title]="isSidebarCollapsed ? 'Collaborators' : ''">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="7" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M2 17a5 5 0 0 1 10 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="14" cy="6.5" r="2.5" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M14 12c2.2.4 3.8 2 3.8 3.8H14"
+                    stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-label">Team Members</span>
+        </a>
+
+        <!-- Points -->
+        <a routerLink="/hrbp/points" routerLinkActive="active" class="nav-link"
+           [title]="isSidebarCollapsed ? 'Points' : ''">
+          <span class="nav-icon">
+
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect x="2" y="2" width="16" height="16" rx="3"
+            stroke="currentColor" stroke-width="1.5"/>
+      <path d="M6 10l2 2 5-5"
+            stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+          </span>
+          <span class="nav-label">Points</span>
+        </a>
+
+        <!-- Demandes & Réclamations ← NOUVEAU -->
+        <a routerLink="/hrbp/requests" routerLinkActive="active" class="nav-link"
+           [title]="isSidebarCollapsed ? 'Demandes & Réclamations' : ''">
+          <span class="nav-icon">
+             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="2" y="2" width="16" height="16" rx="3"
+                    stroke="currentColor" stroke-width="1.5"/>
+              <path d="M5.5 7h9M5.5 10h7M5.5 13h5"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-label">Demandes & Réclamations</span>
+        </a>
+
+        <!-- Dashboard -->
+        <a routerLink="/hrbp/dashboardHRBP" routerLinkActive="active" class="nav-link"
+           [title]="isSidebarCollapsed ? 'Dashboard' : ''">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="2"  y="2"  width="7" height="8"  rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="11" y="2"  width="7" height="5"  rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="11" y="9"  width="7" height="9"  rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="2"  y="12" width="7" height="6"  rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </span>
+          <span class="nav-label">Dashboard</span>
+        </a>
+
+        <!-- Team Satisfaction -->
+        <a routerLink="/hrbp/equipe-satisfaction" routerLinkActive="active" class="nav-link"
+           [title]="isSidebarCollapsed ? 'Équipe' : ''">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                 stroke="currentColor" stroke-width="1.5">
+              <circle cx="7"  cy="6" r="3"/>
+              <circle cx="13" cy="6" r="3"/>
+              <path d="M1 17a6 6 0 0 1 12 0"/>
+              <path d="M13 13a6 6 0 0 1 6 4"/>
+            </svg>
+          </span>
+          <span class="nav-label">Team Satisfaction</span>
+        </a>
+
+        <!-- My Profile -->
+        <a [routerLink]="['/hrbp/SelfProfile', currentUserId]"
+           routerLinkActive="active" class="nav-link"
+           [title]="isSidebarCollapsed ? 'My Profile' : ''">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                 stroke="currentColor" stroke-width="1.5">
+              <circle cx="10" cy="7" r="3.5"/>
+              <path d="M2.5 18a7.5 7.5 0 0 1 15 0"/>
+            </svg>
+          </span>
+          <span class="nav-label">My Profile</span>
+        </a>
+
+      </nav>
+
+      <!-- PRACTICES SECTION -->
+      <div class="sidebar-section sidebar-section--grow" *ngIf="!isSidebarCollapsed">
+        <div class="section-label-row">
+          <p class="section-label">Practices</p>
+          <div class="mini-spinner" *ngIf="isLoadingStats"></div>
+        </div>
+        <div class="practice-list">
+          <button *ngFor="let stat of practiceStats"
+                  class="practice-btn"
+                  [class.active]="selectedPractice === stat.name"
+                  (click)="selectPractice(stat.name)"
+                  [title]="stat.name">
+            <span class="practice-btn-name">
+              {{ stat.name === 'ALL' ? 'All Collaborators' : stat.name }}
+            </span>
+            <span class="practice-btn-count">{{ stat.count }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-spacer"></div>
+
+      <!-- FOOTER -->
+      <div class="sidebar-footer">
+        <button class="footer-btn" [title]="isSidebarCollapsed ? 'Settings' : ''">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <circle cx="7.5" cy="7.5" r="2" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M7.5 1.5v2M7.5 11.5v2M1.5 7.5h2M11.5 7.5h2
+                     M3.3 3.3l1.4 1.4M10.3 10.3l1.4 1.4M10.3 3.3l-1.4 1.4M4.7 10.3l-1.4 1.4"
+                  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          <span class="footer-label">Settings</span>
+        </button>
+
+        <button class="footer-btn footer-btn--logout" (click)="logout()"
+                [title]="isSidebarCollapsed ? 'Logout' : ''">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <path d="M5.5 2H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h2.5"
+                  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M10 10l3-3-3-3M13 7H6"
+                  stroke="currentColor" stroke-width="1.3"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="footer-label">Logout</span>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="app-content" [class.sidebar-collapsed]="isSidebarCollapsed">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+</div>

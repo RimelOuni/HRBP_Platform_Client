@@ -1,0 +1,170 @@
+<div class="page-wrapper">
+  <div class="form-card">
+
+    <div class="form-card-header">
+      <div class="header-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Ajouter un point</h1>
+        <p>Remplissez les informations ci-dessous</p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="form-body">
+
+      <!-- HRBP (Collaborateur) -->
+      <div class="field">
+        <label>HRBP <span class="field-badge">Collaborateur</span></label>
+        <div class="hrbp-display">
+          <div class="user-chip readonly">
+            <div class="user-avatar">
+              {{ hrbp?.first_name?.[0] || 'H' }}{{ hrbp?.last_name?.[0] || 'R' }}
+            </div>
+            <span class="user-name">{{ hrbp ? (hrbp.first_name + ' ' + hrbp.last_name) : 'Chargement...' }}</span>
+          </div>
+          <span class="badge">Vous</span>
+        </div>
+      </div>
+
+      <!-- DATE + PRACTICE Row -->
+      <div class="row-2">
+        <div class="field">
+          <label for="date">Date <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input
+              id="date"
+              type="datetime-local"
+              [(ngModel)]="form.date"
+              name="date"
+              required
+              class="input"
+            />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="practice">Practice <span class="required">*</span></label>
+          <select
+            id="practice"
+            [(ngModel)]="form.practice_id"
+            name="practice_id"
+            class="input select"
+            required
+            (change)="onPracticeChange()"
+          >
+            <option value="">— Sélectionner une practice —</option>
+            <option *ngFor="let p of hrbpPractices" [value]="p._id">{{ p.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- DURÉE + FRÉQUENCE Row -->
+      <div class="row-2">
+        <div class="field">
+          <label for="duree">Durée estimée</label>
+          <select id="duree" [(ngModel)]="form.duree_estimee" name="duree" class="input select">
+            <option value="">— Sélectionner —</option>
+            <option value="15 min">15 min</option>
+            <option value="30 min">30 min</option>
+            <option value="1h">1h</option>
+            <option value="2h">2h</option>
+            <option value="Demi-journée">Demi-journée</option>
+            <option value="Journée">Journée</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="frequence">Fréquence</label>
+          <select id="frequence" [(ngModel)]="form.frequence" name="frequence" class="input select">
+            <option value="">— Sélectionner —</option>
+            <option value="Ponctuel">Ponctuel</option>
+            <option value="Hebdomadaire">Hebdomadaire</option>
+            <option value="Bimensuel">Bimensuel</option>
+            <option value="Chaque mois">Chaque mois</option>
+            <option value="Trimestriel">Trimestriel</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- INVITÉS -->
+      <div class="field" *ngIf="form.practice_id">
+        <div class="field-header">
+          <label>Invités <span class="field-badge">Optionnel</span></label>
+          <span class="selection-count" *ngIf="form.invite.length > 0">
+            {{ form.invite.length }} sélectionné(s)
+          </span>
+        </div>
+        <p class="field-hint">Sélectionnez les collaborateurs à inviter pour ce point</p>
+
+        <div class="members-grid" *ngIf="practiceMembers.length > 0">
+          <div
+            *ngFor="let member of practiceMembers"
+            class="member-card"
+            [class.selected]="isInvited(member._id)"
+            (click)="toggleInvite(member._id)"
+          >
+            <div class="member-avatar">
+              {{ member.first_name[0] }}{{ member.last_name[0] }}
+            </div>
+            <div class="member-info">
+              <span class="member-name">{{ member.first_name }} {{ member.last_name }}</span>
+              <span class="member-role" [class.manager]="member.role === 'MANAGER'">
+                {{ member.role === 'MANAGER' ? 'Manager' : 'Collaborateur' }}
+              </span>
+            </div>
+            <div class="check-indicator" *ngIf="isInvited(member._id)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="practiceMembers.length === 0 && !isSubmitting">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <p>Aucun membre trouvé dans cette practice</p>
+        </div>
+      </div>
+
+      <!-- Practice hint -->
+      <div class="field hint-box" *ngIf="!form.practice_id">
+        <div class="hint-content">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <span>Sélectionnez une practice pour voir les membres disponibles</span>
+        </div>
+      </div>
+
+      <!-- ERROR -->
+      <div *ngIf="errorMessage" class="error-msg">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ errorMessage }}
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="form-actions">
+        <button type="button" (click)="onCancel()" class="btn-cancel">Annuler</button>
+        <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+          <span *ngIf="!isSubmitting">Ajouter le point</span>
+          <span *ngIf="isSubmitting" class="btn-spinner"></span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

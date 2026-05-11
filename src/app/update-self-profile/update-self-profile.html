@@ -1,0 +1,217 @@
+<div class="profile-wrapper" *ngIf="!loading; else loadingTpl">
+
+  <!-- Header -->
+  <div class="eu-header">
+    <div class="eu-header-left">
+      <h1 class="eu-title">User Profile</h1>
+      <p class="eu-subtitle">View user information and HR details</p>
+    </div>
+    <button class="save-btn" (click)="saveChanges()" [disabled]="saving || !hasChanges">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      {{ saving ? 'Saving...' : 'Save Changes' }}
+    </button>
+  </div>
+
+  <!-- Toasts -->
+  <div class="toast toast-success" *ngIf="successMsg">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    {{ successMsg }}
+  </div>
+  <div class="toast toast-error" *ngIf="errorMsg">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="15" y1="9" x2="9" y2="15"/>
+      <line x1="9" y1="9" x2="15" y2="15"/>
+    </svg>
+    {{ errorMsg }}
+  </div>
+
+  <!-- ── Hero Card ── -->
+  <div class="section-card hero-card">
+    <div class="hero-top">
+      <div class="hero-left">
+        <!-- Avatar -->
+        <div class="avatar-circle">
+          <img *ngIf="form.photo_url" [src]="form.photo_url" alt="avatar" />
+          <span *ngIf="!form.photo_url">{{ userInitials }}</span>
+        </div>
+        <!-- Info -->
+        <div class="hero-info">
+          <div class="hero-name-row">
+            <h2 class="hero-name">{{ displayName }}</h2>
+            <span class="status-badge" [class.active]="isActive" [class.inactive]="!isActive">
+              {{ isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+          <p class="hero-emp-id">{{ displayEmpId || 'N/A' }}</p>
+          <div class="hero-meta">
+            <span class="hero-meta-item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              {{ displayEmail }}
+            </span>
+            <span class="hero-meta-item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              {{ form.phone || 'N/A' }}
+            </span>
+            <span class="hero-meta-item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              Joined {{ formatDate(joinedDate) }}
+            </span>
+            <span class="hero-meta-item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              Last login {{ formatDate(lastLogin) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Photo upload -->
+      <div class="hero-photo-actions">
+        <input
+          type="file"
+          #fileInput
+          accept="image/jpeg,image/png,image/gif"
+          style="display:none"
+          (change)="onPhotoSelected($event)"
+        />
+        <button class="upload-btn" (click)="fileInput.click()" [disabled]="uploadingPhoto">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 16 12 12 8 16"/>
+            <line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+          {{ uploadingPhoto ? 'Uploading...' : 'Change Photo' }}
+        </button>
+        <button *ngIf="form.photo_url" class="remove-photo-btn" (click)="removePhoto()">Remove</button>
+      </div>
+    </div>
+
+    <!-- Editable phone -->
+    <div class="hero-phone-edit">
+      <div class="field-group">
+        <label>Phone Number</label>
+        <input type="tel" [(ngModel)]="form.phone" placeholder="+216 XX XX XX XX" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Role & Permissions ── -->
+  <div class="section-card">
+    <div class="section-header">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <div>
+        <h3>Role &amp; Permissions</h3>
+        <p>User role and access level</p>
+      </div>
+    </div>
+
+    <div class="section-body">
+      <div class="field-readonly">
+        <span class="field-readonly-label">Role</span>
+        <span class="field-readonly-value">{{ formatRole(displayRole) }}</span>
+      </div>
+      <div class="role-desc-box">
+        {{ getRoleDescription(displayRole) }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Professional Information ── -->
+  <div class="section-card">
+    <div class="section-header">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+      </svg>
+      <div>
+        <h3>Professional Information</h3>
+        <p>Practice assignment and career details</p>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-grid-item">
+        <span class="info-grid-label">Practice</span>
+        <span class="info-grid-value">{{ displayPractice || 'N/A' }}</span>
+      </div>
+      <div class="info-grid-item">
+        <span class="info-grid-label">Grade</span>
+        <span class="info-grid-value">{{ displayGrade || 'N/A' }}</span>
+      </div>
+      <div class="info-grid-item">
+        <span class="info-grid-label">Operational Responsible (RO)</span>
+        <span class="info-grid-value">{{ displayRo || 'N/A' }}</span>
+      </div>
+      <div class="info-grid-item">
+        <span class="info-grid-label">Career Counselor (CC)</span>
+        <span class="info-grid-value">{{ displayCc || 'N/A' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── System Information ── -->
+  <div class="section-card">
+    <div class="section-header">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <div>
+        <h3>System Information</h3>
+        <p>Account metadata and timestamps</p>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-grid-item">
+        <span class="info-grid-label">Created At</span>
+        <span class="info-grid-value">{{ formatDate(createdAt) }}</span>
+      </div>
+      <div class="info-grid-item">
+        <span class="info-grid-label">Last Updated</span>
+        <span class="info-grid-value">{{ formatDate(updatedAt) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info note -->
+  <div class="info-note">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <p>Name, email, role, and professional details can only be changed by an administrator.</p>
+  </div>
+
+</div>
+
+<!-- Loading -->
+<ng-template #loadingTpl>
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading profile...</p>
+  </div>
+</ng-template>

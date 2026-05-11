@@ -1,0 +1,87 @@
+<div class="app-layout">
+
+  <!-- ===== SIDEBAR ===== -->
+ 
+
+  <!-- ===== MAIN ===== -->
+  <div class="main-content">
+
+    <!-- TOP NAVBAR -->
+   
+
+    <!-- PAGE CONTENT -->
+    <div class="content">
+
+      <h1>Vue d'ensemble de l'équipe</h1>
+      <p class="subtitle">Suivi du bien-être de tes collaborateurs</p>
+
+      <!-- STATS -->
+      <section class="stats">
+        <div class="stat-card">
+          <span>Total équipe</span>
+          <h2>{{ totalTeam }}</h2>
+        </div>
+
+        <div class="stat-card">
+          <span>Mood moyen</span>
+          <h2>{{ averageMood }}</h2>
+        </div>
+
+
+      </section>
+
+
+
+
+      <!-- TEAM LIST -->
+      <h2 class="section-title">Mes collaborateurs</h2>
+
+     <section class="team-list">
+  <div class="member" *ngFor="let user of users">
+
+    <!-- Infos utilisateur -->
+    <div class="member-info">
+      <div class="avatar">{{ user.first_name.charAt(0) }}</div>
+      <div>
+        <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+        <div class="role">{{ user.role }}</div>
+      </div>
+    </div>
+
+    <!-- Mood -->
+    <div class="badge">
+      {{ getMoodEmoji(getLastMood(user) ?? undefined) }}
+      <span [class]="'sat-label sat-' + getMoodLabel(user).toLowerCase()">
+        {{ getMoodLabel(user) }}
+      </span>
+    </div>
+
+    <!-- Satisfaction -->
+    <div class="badge">
+      ⭐ {{ getLastSatisfaction(user) }}
+    </div>
+
+    <!-- ✅ Criticité — box compact groupé -->
+    <div class="criticite-box">
+      <span class="crit-item haute">
+        <span class="crit-dot"></span>
+        {{ criticiteMap[user._id]?.Haute ?? 0 }}
+      </span>
+      <span class="crit-sep">|</span>
+      <span class="crit-item moyenne">
+        <span class="crit-dot"></span>
+        {{ criticiteMap[user._id]?.Moyenne ?? 0 }}
+      </span>
+      <span class="crit-sep">|</span>
+      <span class="crit-item basse">
+        <span class="crit-dot"></span>
+        {{ criticiteMap[user._id]?.Basse ?? 0 }}
+      </span>
+    </div>
+
+  </div>
+</section>
+
+    </div>
+  </div>
+</div>

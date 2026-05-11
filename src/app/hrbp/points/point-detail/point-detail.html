@@ -1,0 +1,516 @@
+<div class="detail-container">
+  <div class="header">
+    <button (click)="goBack()" class="back-btn">
+      ←
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Chargement des détails...</p>
+  </div>
+
+  <div *ngIf="!isLoading && point" class="detail-card">
+    <div class="card-header">
+      <h1>{{ point.titre }}</h1>
+      <div class="badges">
+        <span class="badge" [ngClass]="getStatusClass(point.status || '')">
+          {{ point.status }}
+        </span>
+        <span class="badge" [ngClass]="getCriticiteClass(point.criticite || '')">
+          {{ point.criticite }}
+        </span>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="info-grid">
+
+        <div class="info-item">
+          <label>📅 Date</label>
+          <p>{{ formatDate(point.date) }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>⏱️ Durée estimée</label>
+          <p>{{ point.duree_estimee || 'Non spécifiée' }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>🔁 Fréquence</label>
+          <p>{{ point.frequence || 'Non spécifiée' }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>📊 Statut</label>
+          <span class="badge" [ngClass]="getStatusClass(point.status || '')">
+            {{ point.status }}
+          </span>
+        </div>
+
+        <div class="info-item full-width">
+          <label>📝 Description</label>
+          <p class="description">{{ point.description || 'Aucune description' }}</p>
+        </div>
+
+        <div class="info-item full-width" *ngIf="point.invite && hasContent(point.invite)">
+          <label>🎯 Invité</label>
+          <ng-container *ngIf="isArray(point.invite)">
+            <div class="person-details" *ngFor="let inv of point.invite">
+              <p *ngIf="inv.last_name || inv.nom"><strong>Nom:</strong> {{ inv.last_name || inv.nom }}</p>
+              <p *ngIf="inv.first_name || inv.prenom"><strong>Prénom:</strong> {{ inv.first_name || inv.prenom }}</p>
+              <p *ngIf="inv.email"><strong>Email:</strong><a [href]="'mailto:' + inv.email">{{ inv.email }}</a></p>
+            </div>
+          </ng-container>
+          <div class="person-details" *ngIf="!isArray(point.invite)">
+            <p *ngIf="point.invite.last_name || point.invite.nom"><strong>Nom:</strong> {{ point.invite.last_name || point.invite.nom }}</p>
+            <p *ngIf="point.invite.first_name || point.invite.prenom"><strong>Prénom:</strong> {{ point.invite.first_name || point.invite.prenom }}</p>
+            <p *ngIf="point.invite.email"><strong>Email:</strong><a [href]="'mailto:' + point.invite.email">{{ point.invite.email }}</a></p>
+          </div>
+        </div>
+
+        <div class="info-item full-width" *ngIf="point.labels && point.labels.length > 0">
+          <label>🏷️ Labels</label>
+          <div class="labels">
+            <span *ngFor="let label of point.labels" class="label-tag">{{ label }}</span>
+          </div>
+        </div>
+
+        <div class="info-item" *ngIf="point.created_by">
+          <label>👨‍💼 Créé par</label>
+          <p>
+            {{ point.created_by.first_name }} {{ point.created_by.last_name }}
+            <span *ngIf="point.created_by.email" class="email-small">({{ point.created_by.email }})</span>
+          </p>
+        </div>
+
+        <div class="info-item" *ngIf="point.practice_id">
+          <label>🎯 Practice</label>
+          <p>{{ point.practice_id.name }}</p>
+        </div>
+
+        <div class="info-item" *ngIf="point.createdAt">
+          <label>📆 Date de création</label>
+          <p>{{ formatDate(point.createdAt) }}</p>
+        </div>
+
+        <div class="info-item" *ngIf="point.updatedAt">
+          <label>🔄 Dernière mise à jour</label>
+          <p>{{ formatDate(point.updatedAt) }}</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ACTIONS SECTION -->
+    <div class="actions-section">
+      <div class="actions-header">
+        <h2>⚡ Actions associées</h2>
+        <button (click)="openCreateActionModal()" class="add-action-btn">
+          + Nouvelle action
+        </button>
+      </div>
+
+      <div class="table-container">
+        <div *ngIf="loadingActions" class="loading-small">
+          <div class="spinner-small"></div>
+          <p>Chargement des actions...</p>
+        </div>
+
+        <div *ngIf="!loadingActions && actions.length === 0" class="no-actions">
+          <p>Aucune action pour ce point</p>
+        </div>
+
+        <table *ngIf="!loadingActions && actions.length > 0" class="actions-table">
+          <thead>
+            <tr>
+              <th>Catégorie</th>
+              <th>Titre</th>
+              <th>Description</th>
+              <th>Priorité</th>
+              <th>Créé par</th>
+              <th>Date de création</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let action of actions">
+              <td class="category-cell">
+                <span class="category-badge">{{ getCategoryLabel(action.action) }}</span>
+              </td>
+              <td class="title-cell">{{ action.action }}</td>
+              <td class="description-cell">
+                {{ action.description ? (action.description.length > 50 ? action.description.substring(0, 50) + '...' : action.description) : '-' }}
+              </td>
+              <td>
+                <span class="badge-action" [ngClass]="getActionStatusClass(action.status)">
+                  {{ getActionStatusLabel(action.status) }}
+                </span>
+              </td>
+              <td class="creator-cell">
+                <span *ngIf="action.created_by">{{ action.created_by.first_name }} {{ action.created_by.last_name }}</span>
+                <span *ngIf="!action.created_by">-</span>
+              </td>
+              <td class="date-cell">{{ action.createdAt ? formatDateShort(action.createdAt) : '-' }}</td>
+              <td class="actions-cell">
+                <button (click)="openViewActionModal(action)" class="btn-icon btn-view" title="Voir">👁️</button>
+                <button (click)="openEditActionModal(action)" class="btn-icon btn-edit" title="Modifier">✏️</button>
+                <button (click)="deleteActionConfirm(action)" class="btn-icon btn-delete" title="Supprimer">🗑️</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- ALERTES SECTION                                           -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div class="alertes-section">
+      <div class="alertes-header">
+        <div class="alertes-header-left">
+          <h2>🔔 Alertes &amp; Notifications</h2>
+          <span class="alertes-count-badge" *ngIf="alertes.length > 0">{{ alertes.length }}</span>
+        </div>
+        <button (click)="openCreateAlerteModal()" class="add-alerte-btn">
+          + Nouvelle alerte
+        </button>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="alertes.length === 0" class="no-alertes">
+        <div class="no-alertes-icon">🔕</div>
+        <p>Aucune alerte pour ce point</p>
+        <span>Créez une alerte pour notifier un manager ou suivre une action importante</span>
+      </div>
+
+      <!-- Alertes list -->
+      <div *ngIf="alertes.length > 0" class="alertes-list">
+        <div
+          *ngFor="let alerte of alertes"
+          class="alerte-card"
+          [ngClass]="getAlerteTypeClass(alerte.type)">
+
+          <div class="alerte-card-left">
+            <div class="alerte-icon-wrap">
+              <span class="alerte-type-icon">{{ getAlerteTypeIcon(alerte.type) }}</span>
+            </div>
+          </div>
+
+          <div class="alerte-card-body">
+            <div class="alerte-card-top">
+              <div class="alerte-meta">
+                <span class="alerte-type-label">{{ getAlerteTypeLabel(alerte.type) }}</span>
+                <span class="alerte-dot">·</span>
+                <span class="alerte-destination">
+                  Destinataire : <strong>{{ getAlerteDestinationLabel(alerte) }}</strong>
+                </span>
+                <span class="alerte-dot">·</span>
+                <span class="alerte-date">{{ formatDateShort(alerte.date) }}</span>
+              </div>
+              <span class="alerte-statut-badge" [ngClass]="getAlerteStatutClass(alerte.statut)">
+                {{ alerte.statut }}
+              </span>
+            </div>
+
+            <h4 class="alerte-titre">{{ alerte.titre }}</h4>
+
+            <p class="alerte-description" *ngIf="alerte.description">
+              {{ alerte.description }}
+            </p>
+
+            <!-- Key points (for formation/workshop alerts) -->
+            <div class="alerte-keypoints" *ngIf="alerte.keyPoints && alerte.keyPoints.length > 0">
+              <p class="keypoints-label">📌 Points clés pour le manager :</p>
+              <ul>
+                <li *ngFor="let kp of alerte.keyPoints">{{ kp }}</li>
+              </ul>
+            </div>
+
+            <!-- Manager note -->
+            <div class="alerte-manager-note" *ngIf="alerte.managerNote">
+              <span class="manager-note-label">💼 Note manager :</span>
+              <span>{{ alerte.managerNote }}</span>
+            </div>
+          </div>
+
+          <div class="alerte-card-actions">
+            <button (click)="openViewAlerteModal(alerte)" class="btn-icon btn-view" title="Voir">👁️</button>
+            <button (click)="openEditAlerteModal(alerte)" class="btn-icon btn-edit" title="Modifier">✏️</button>
+            <button (click)="deleteAlerteConfirm(alerte)" class="btn-icon btn-delete" title="Supprimer">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END ALERTES SECTION -->
+
+  </div>
+
+  <div *ngIf="!isLoading && !point" class="error">
+    <p>Point non trouvé</p>
+    <button (click)="goBack()" class="back-btn">←</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- CREATE / EDIT ACTION MODAL                    -->
+<!-- ══════════════════════════════════════════════ -->
+<div *ngIf="showActionModal" class="modal-overlay" (click)="closeActionModal()">
+  <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>
+        <span *ngIf="modalMode === 'create'">✨ Créer une nouvelle action</span>
+        <span *ngIf="modalMode === 'edit'">✏️ Modifier l'action</span>
+      </h2>
+      <button (click)="closeActionModal()" class="close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="saveAction()">
+        <div class="form-group">
+          <label for="category">Catégorie *</label>
+          <select id="category" [(ngModel)]="selectedCategory" name="category" required class="form-control" (ngModelChange)="onCategoryChange()">
+            <option value="">— Sélectionner une catégorie —</option>
+            <option *ngFor="let cat of actionCategories" [value]="cat.key">{{ cat.label }}</option>
+          </select>
+        </div>
+        <div class="form-group" *ngIf="selectedCategory">
+          <label for="action">Titre de l'action *</label>
+          <select id="action" [(ngModel)]="actionForm.action" name="action" required class="form-control">
+            <option value="">— Sélectionner un titre —</option>
+            <option *ngFor="let act of getActionsForCategory(selectedCategory)" [value]="act">{{ act }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" [(ngModel)]="actionForm.description" name="description" rows="4" placeholder="Détails de l'action..." class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="status">Priorité *</label>
+          <select id="status" [(ngModel)]="actionForm.status" name="status" required class="form-control">
+            <option value="NONE">Aucune</option>
+            <option value="LOW">Basse</option>
+            <option value="MEDIUM">Moyenne</option>
+            <option value="HIGH">Haute</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" (click)="closeActionModal()" class="btn-secondary">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="!selectedCategory || !actionForm.action">
+            <span *ngIf="modalMode === 'create'">✓ Créer</span>
+            <span *ngIf="modalMode === 'edit'">✓ Mettre à jour</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW ACTION DETAILS MODAL -->
+<div *ngIf="showViewModal && selectedAction" class="modal-overlay" (click)="closeViewModal()">
+  <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>📋 Détails de l'action</h2>
+      <button (click)="closeViewModal()" class="close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-grid">
+        <div class="detail-item full-width">
+          <label>📂 Catégorie</label>
+          <p class="highlight">{{ getCategoryLabel(selectedAction.action) }}</p>
+        </div>
+        <div class="detail-item full-width">
+          <label>📌 Titre</label>
+          <p class="highlight">{{ selectedAction.action }}</p>
+        </div>
+        <div class="detail-item full-width" *ngIf="selectedAction.description">
+          <label>📝 Description</label>
+          <p class="description-box">{{ selectedAction.description }}</p>
+        </div>
+        <div class="detail-item">
+          <label>🎯 Priorité</label>
+          <span class="badge-action" [ngClass]="getActionStatusClass(selectedAction.status)">{{ getActionStatusLabel(selectedAction.status) }}</span>
+        </div>
+        <div class="detail-item">
+          <label>👤 Créé par</label>
+          <p *ngIf="selectedAction.created_by">
+            <strong>{{ selectedAction.created_by.first_name }} {{ selectedAction.created_by.last_name }}</strong>
+            <br><span class="text-muted">{{ selectedAction.created_by.email }}</span>
+          </p>
+          <p *ngIf="!selectedAction.created_by">-</p>
+        </div>
+        <div class="detail-item">
+          <label>📅 Date de création</label>
+          <p>{{ selectedAction.createdAt ? formatDate(selectedAction.createdAt) : '-' }}</p>
+        </div>
+        <div class="detail-item">
+          <label>🔄 Dernière modification</label>
+          <p>{{ selectedAction.updatedAt ? formatDate(selectedAction.updatedAt) : '-' }}</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button (click)="openEditActionModal(selectedAction)" class="btn-secondary">✏️ Modifier</button>
+        <button (click)="closeViewModal()" class="btn-primary">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- CREATE / EDIT ALERTE MODAL                    -->
+<!-- ══════════════════════════════════════════════ -->
+<div *ngIf="showAlerteModal" class="modal-overlay" (click)="closeAlerteModal()">
+  <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header alerte-modal-header">
+      <h2>
+        <span *ngIf="alerteModalMode === 'create'">🔔 Créer une nouvelle alerte</span>
+        <span *ngIf="alerteModalMode === 'edit'">✏️ Modifier l'alerte</span>
+      </h2>
+      <button (click)="closeAlerteModal()" class="close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Type selector as visual cards -->
+      <div class="form-group">
+        <label>Type d'alerte *</label>
+        <div class="alerte-type-grid">
+          <div
+            *ngFor="let type of alerteTypes"
+            class="alerte-type-card"
+            [ngClass]="{ 'alerte-type-card--selected': alerteForm.type === type.key }"
+            (click)="selectAlerteType(type.key)">
+            <span class="alerte-type-card-icon">{{ type.icon }}</span>
+            <span class="alerte-type-card-label">{{ type.label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="alerteForm.type">
+
+        <div class="form-group">
+          <label>Titre *</label>
+          <select [(ngModel)]="alerteForm.titre" name="alerteTitre" class="form-control" (ngModelChange)="onAlerteTitreChange()">
+            <option value="">— Sélectionner un titre prédéfini —</option>
+            <option *ngFor="let t of getAlerteTitresForType(alerteForm.type)" [value]="t">{{ t }}</option>
+          </select>
+        </div>
+
+        <!-- Destinataire: select from available managers (RO / CC) -->
+        <div class="form-group">
+          <label>Destinataire *</label>
+          <select [(ngModel)]="alerteForm.destination_user_id" name="alerteDestination" class="form-control">
+            <option value="">— Sélectionner un destinataire —</option>
+            <option *ngFor="let m of availableManagers" [value]="m.user._id">{{ m.label }}</option>
+          </select>
+          <small *ngIf="availableManagers.length === 0" class="form-hint">
+            Aucun manager (RO/CC) associé à ce collaborateur.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Date d'envoi *</label>
+          <input type="date" [(ngModel)]="alerteForm.date" name="alerteDate" class="form-control"/>
+        </div>
+
+        <div class="form-group">
+          <label>Statut</label>
+          <select [(ngModel)]="alerteForm.statut" name="alerteStatut" class="form-control">
+            <option value="En attente">En attente</option>
+            <option value="Envoyée">Envoyée</option>
+            <option value="Lue">Lue</option>
+            <option value="Traitée">Traitée</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="alerteForm.description" name="alerteDescription" rows="3" class="form-control" placeholder="Contexte ou message à transmettre..."></textarea>
+        </div>
+
+        <!-- Manager note — shown for all types -->
+        <div class="form-group">
+          <label>💼 Note pour le manager</label>
+          <textarea [(ngModel)]="alerteForm.managerNote" name="alerteManagerNote" rows="2" class="form-control" placeholder="Ce que le manager doit savoir à propos de ce collaborateur..."></textarea>
+        </div>
+
+        <!-- Key points — pre-filled for formation/workshop types, always editable -->
+        <div class="form-group">
+          <label>📌 Points clés (un par ligne)</label>
+          <div class="keypoints-hint" *ngIf="alerteForm.type === 'formation' || alerteForm.type === 'workshop'">
+            <span>💡 Points clés pré-remplis selon le type — modifiez selon le besoin</span>
+          </div>
+          <textarea
+            [(ngModel)]="alerteForm.keyPointsRaw"
+            name="alerteKeyPoints"
+            rows="5"
+            class="form-control"
+            placeholder="- Objectif de la formation&#10;- Compétences visées&#10;- Disponibilité requise..."></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" (click)="closeAlerteModal()" class="btn-secondary">Annuler</button>
+        <button
+          type="button"
+          (click)="saveAlerte()"
+          class="btn-primary btn-alerte"
+          [disabled]="!alerteForm.type || !alerteForm.titre || !alerteForm.destination_user_id || !alerteForm.date">
+          <span *ngIf="alerteModalMode === 'create'">🔔 Créer l'alerte</span>
+          <span *ngIf="alerteModalMode === 'edit'">✓ Mettre à jour</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- VIEW ALERTE DETAILS MODAL                     -->
+<!-- ══════════════════════════════════════════════ -->
+<div *ngIf="showViewAlerteModal && selectedAlerte" class="modal-overlay" (click)="closeViewAlerteModal()">
+  <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header alerte-modal-header">
+      <h2>🔔 Détails de l'alerte</h2>
+      <button (click)="closeViewAlerteModal()" class="close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alerte-view-header" [ngClass]="getAlerteTypeClass(selectedAlerte.type)">
+        <span class="alerte-view-icon">{{ getAlerteTypeIcon(selectedAlerte.type) }}</span>
+        <div>
+          <p class="alerte-view-type">{{ getAlerteTypeLabel(selectedAlerte.type) }}</p>
+          <h3 class="alerte-view-titre">{{ selectedAlerte.titre }}</h3>
+        </div>
+        <span class="alerte-statut-badge ml-auto" [ngClass]="getAlerteStatutClass(selectedAlerte.statut)">{{ selectedAlerte.statut }}</span>
+      </div>
+
+      <div class="detail-grid" style="margin-top:1.25rem">
+        <div class="detail-item">
+          <label>📬 Destinataire</label>
+          <p><strong>{{ getAlerteDestinationLabel(selectedAlerte) }}</strong></p>
+        </div>
+        <div class="detail-item">
+          <label>📅 Date</label>
+          <p>{{ formatDate(selectedAlerte.date) }}</p>
+        </div>
+        <div class="detail-item full-width" *ngIf="selectedAlerte.description">
+          <label>📝 Description</label>
+          <p class="description-box">{{ selectedAlerte.description }}</p>
+        </div>
+        <div class="detail-item full-width" *ngIf="selectedAlerte.managerNote">
+          <label>💼 Note pour le manager</label>
+          <p class="description-box manager-note-box">{{ selectedAlerte.managerNote }}</p>
+        </div>
+        <div class="detail-item full-width" *ngIf="selectedAlerte.keyPoints && selectedAlerte.keyPoints.length > 0">
+          <label>📌 Points clés</label>
+          <ul class="keypoints-view-list">
+            <li *ngFor="let kp of selectedAlerte.keyPoints">{{ kp }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button (click)="openEditAlerteModal(selectedAlerte)" class="btn-secondary">✏️ Modifier</button>
+        <button (click)="closeViewAlerteModal()" class="btn-primary">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

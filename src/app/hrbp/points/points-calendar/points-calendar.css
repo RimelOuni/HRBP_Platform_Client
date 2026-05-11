@@ -1,0 +1,470 @@
+/* points-calendar.css — Microsoft Teams calendar aesthetic */
+
+/* ── Shell layout ── */
+.teams-shell {
+  display: flex;
+  height: calc(100vh - 60px); /* adjust to your app's top nav height */
+  background: #f5f5f5;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: #fff;
+  border-right: 1px solid #e5e5e5;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px 12px;
+  overflow-y: auto;
+}
+
+/* New event button */
+.new-event-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1.5px solid #d1d1d1;
+  border-radius: 4px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #242424;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  width: 100%;
+}
+
+.new-event-btn:hover {
+  background: #f5f5f5;
+  border-color: #a8a8a8;
+}
+
+.plus-icon {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #6264A7; /* Teams purple */
+  line-height: 1;
+}
+
+/* ── Mini calendar ── */
+.mini-cal {
+  user-select: none;
+}
+
+.mini-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.mini-month-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #242424;
+  letter-spacing: 0.01em;
+}
+
+.mini-nav {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #616161;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background 0.12s;
+}
+
+.mini-nav:hover {
+  background: #f0f0f0;
+}
+
+.mini-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.mini-day-name {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #a0a0a0;
+  text-align: center;
+  padding: 3px 0 5px;
+  letter-spacing: 0.02em;
+}
+
+.mini-day {
+  position: relative;
+  font-size: 0.72rem;
+  text-align: center;
+  padding: 4px 2px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #242424;
+  transition: background 0.12s;
+  line-height: 1.4;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-day:hover {
+  background: #f0f0f0;
+}
+
+.mini-day.other-month {
+  color: #c0c0c0;
+}
+
+.mini-day.today {
+  background: #6264A7;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 50%;
+}
+
+.mini-day.today:hover {
+  background: #4f51a3;
+}
+
+.event-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #6264A7;
+  margin-top: 1px;
+  display: block;
+}
+
+.mini-day.today .event-dot {
+  background: #fff;
+}
+
+/* ── Sidebar legend ── */
+.sidebar-legend {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.legend-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #a0a0a0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.75rem;
+  color: #424242;
+  padding: 3px 0;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════
+   MAIN CALENDAR AREA
+══════════════════════════════════════ */
+.cal-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* ── Toolbar ── */
+.cal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fff;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-today-btn {
+  background: #fff;
+  border: 1.5px solid #d1d1d1;
+  border-radius: 4px;
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #242424;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.toolbar-today-btn:hover {
+  background: #f5f5f5;
+}
+
+.toolbar-nav {
+  display: flex;
+  gap: 2px;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: #616161;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background 0.12s;
+}
+
+.nav-btn:hover {
+  background: #f0f0f0;
+}
+
+.toolbar-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #242424;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* View switcher pill */
+.view-switcher {
+  display: flex;
+  border: 1.5px solid #d1d1d1;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.view-btn {
+  background: #fff;
+  border: none;
+  border-right: 1px solid #d1d1d1;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #424242;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  font-family: inherit;
+}
+
+.view-btn:last-child {
+  border-right: none;
+}
+
+.view-btn:hover {
+  background: #f5f5f5;
+}
+
+.view-btn.active {
+  background: #6264A7;
+  color: #fff;
+  font-weight: 600;
+}
+
+.list-view-btn {
+  background: #fff;
+  border: 1.5px solid #d1d1d1;
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #424242;
+  cursor: pointer;
+  transition: background 0.12s;
+  font-family: inherit;
+}
+
+.list-view-btn:hover {
+  background: #f5f5f5;
+}
+
+/* ── FullCalendar wrapper ── */
+.fc-wrapper {
+  flex: 1;
+  overflow: auto;
+  padding: 0 16px 16px;
+}
+
+/* ── FullCalendar overrides (Teams style) ── */
+:host ::ng-deep .fc {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+:host ::ng-deep .fc-toolbar {
+  display: none !important; /* We use our own toolbar */
+}
+
+:host ::ng-deep .fc-col-header-cell-cushion {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #616161;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 10px 4px;
+  text-decoration: none;
+}
+
+:host ::ng-deep .fc-daygrid-day-number {
+  font-size: 0.8rem;
+  color: #424242;
+  font-weight: 500;
+  padding: 6px 8px;
+  text-decoration: none;
+}
+
+:host ::ng-deep .fc-day-today .fc-daygrid-day-number {
+  background: #6264A7;
+  color: #fff;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px;
+  padding: 0;
+}
+
+:host ::ng-deep .fc-day-today {
+  background: #f7f7fb !important;
+}
+
+:host ::ng-deep .fc-daygrid-event {
+  border-radius: 3px !important;
+  font-size: 0.74rem !important;
+  padding: 2px 6px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  border: none !important;
+  border-left: 3px solid !important;
+  margin-bottom: 2px !important;
+}
+
+:host ::ng-deep .fc-daygrid-event:hover {
+  filter: brightness(0.95);
+}
+
+:host ::ng-deep .fc-more-link {
+  font-size: 0.72rem;
+  color: #6264A7;
+  font-weight: 600;
+  padding: 2px 6px;
+}
+
+:host ::ng-deep .fc-scrollgrid {
+  border: none !important;
+}
+
+:host ::ng-deep .fc-scrollgrid td,
+:host ::ng-deep .fc-scrollgrid th {
+  border-color: #f0f0f0 !important;
+}
+
+:host ::ng-deep .fc-daygrid-day {
+  min-height: 90px;
+}
+
+:host ::ng-deep .fc-timegrid-slot {
+  height: 40px !important;
+}
+
+:host ::ng-deep .fc-timegrid-slot-label {
+  font-size: 0.72rem;
+  color: #a0a0a0;
+}
+
+:host ::ng-deep .fc-list-event {
+  cursor: pointer;
+}
+
+:host ::ng-deep .fc-list-day-cushion {
+  background: #f5f5f5 !important;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #424242;
+}
+
+:host ::ng-deep .fc-list-event-title a {
+  font-size: 0.82rem;
+  color: #242424;
+  text-decoration: none;
+}
+
+/* ── Loading ── */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px;
+  color: #616161;
+  font-size: 0.85rem;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2.5px solid #e5e5e5;
+  border-top-color: #6264A7;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .toolbar-title {
+    font-size: 0.88rem;
+  }
+
+  .view-btn {
+    padding: 5px 8px;
+    font-size: 0.72rem;
+  }
+}

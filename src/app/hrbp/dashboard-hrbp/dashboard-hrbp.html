@@ -1,0 +1,240 @@
+<div class="dashboard-container">
+  <!-- Header élégant avec breadcrumbs -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="breadcrumb">
+        <span class="breadcrumb-item">Accueil</span>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-item active">Dashboard HRBP</span>
+      </div>
+      <h1>Tableau de bord</h1>
+      <p class="header-subtitle">Vue d'ensemble de vos équipes et indicateurs</p>
+    </div>
+    <button class="reset-btn" (click)="resetFilters()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"/>
+        <path d="M3 3v9h9"/>
+      </svg>
+      Réinitialiser
+    </button>
+  </div>
+
+  <!-- Filtres stylisés en carte flottante -->
+  <div class="filters-wrapper">
+    <div class="filters-container">
+      <div class="filter-group">
+        <label>Practice</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="selectedPractice" (change)="onFilterChange()">
+            <option value="">Toutes les practices</option>
+            <option *ngFor="let p of practiceList" [value]="p.id">{{ p.name }}</option>
+          </select>
+          <span class="select-icon">▼</span>
+        </div>
+      </div>
+      
+      <div class="filter-divider"></div>
+      
+      <div class="filter-group">
+        <label>Période</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="selectedMonth" (change)="onFilterChange()">
+            <option value="">Tous les mois</option>
+            <option *ngFor="let m of monthsList" [value]="m">{{ m }}</option>
+          </select>
+          <span class="select-icon">▼</span>
+        </div>
+      </div>
+      
+      <div class="filter-divider"></div>
+      
+      <div class="filter-group">
+        <label>Collaborateur</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="selectedCollaborateur" (change)="onFilterChange()">
+            <option value="">Tous les collaborateurs</option>
+            <option *ngFor="let c of collaborateursList" [value]="c.id">{{ c.name }}</option>
+          </select>
+          <span class="select-icon">▼</span>
+        </div>
+      </div>
+      
+      <div class="filter-divider"></div>
+      
+      <div class="filter-group">
+        <label>Grade</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="selectedGrade" (change)="onFilterChange()">
+            <option value="">Tous les grades</option>
+            <option *ngFor="let g of gradeList" [value]="g">{{ g }}</option>
+          </select>
+          <span class="select-icon">▼</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Cards avec design amélioré -->
+  <div class="kpi-section">
+    <div class="kpi-grid">
+      <div class="kpi-card olive">
+        <div class="kpi-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Total Collaborateurs</span>
+          <span class="kpi-value">{{ kpis.totalCollaborateurs }}</span>
+          <span class="kpi-trend positive">+12% ce mois</span>
+        </div>
+        <div class="kpi-decoration"></div>
+      </div>
+
+      <div class="kpi-card rose">
+        <div class="kpi-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Taux de Réalisation</span>
+          <span class="kpi-value">{{ kpis.tauxRealisation }}</span>
+          <span class="kpi-trend positive">+5.2% vs mois dernier</span>
+        </div>
+        <div class="kpi-decoration"></div>
+      </div>
+
+      <div class="kpi-card orange">
+        <div class="kpi-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Taux de Criticité</span>
+          <span class="kpi-value">{{ kpis.tauxCriticite }}</span>
+          <span class="kpi-trend negative">-2.1% amélioration</span>
+        </div>
+        <div class="kpi-decoration"></div>
+      </div>
+
+      <div class="kpi-card gray">
+        <div class="kpi-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="3" y1="9" x2="21" y2="9"/>
+            <line x1="9" y1="21" x2="9" y2="9"/>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Total Points</span>
+          <span class="kpi-value">{{ kpis.totalPoints }}</span>
+          <span class="kpi-trend neutral">Stable</span>
+        </div>
+        <div class="kpi-decoration"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grille de charts organisée par sections -->
+  <div class="charts-section">
+    <!-- Section 1: Répartition (Donuts) -->
+    <div class="section-header">
+      <h2>Répartition</h2>
+      <span class="section-line"></span>
+    </div>
+    <div class="charts-row four-cols">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Par Practice</h3>
+          <span class="chart-badge">Collaborateurs</span>
+        </div>
+        <div id="collabsPracticeChart" class="chart-body"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Par Grade</h3>
+          <span class="chart-badge">Hiérarchie</span>
+        </div>
+        <div id="collabsGradeChart" class="chart-body"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Statut des Points</h3>
+          <span class="chart-badge">Avancement</span>
+        </div>
+        <div id="pointsStatusChart" class="chart-body"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Key Points</h3>
+          <span class="chart-badge">Priorités</span>
+        </div>
+        <div id="collabsKeypointChart" class="chart-body"></div>
+      </div>
+    </div>
+
+    <!-- Section 2: Tendances (Lignes) -->
+    <div class="section-header">
+      <h2>Tendances</h2>
+      <span class="section-line"></span>
+    </div>
+    <div class="charts-row two-cols">
+      <div class="chart-card wide">
+        <div class="chart-header">
+          <h3>Évolution des Points</h3>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="dot olive"></span>Créés</span>
+            <span class="legend-item"><span class="dot rose"></span>Validés</span>
+          </div>
+        </div>
+        <div id="evolutionPointsChart" class="chart-body"></div>
+      </div>
+      <div class="chart-card wide">
+        <div class="chart-header">
+          <h3>Évolution des Criticités</h3>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="dot orange"></span>Haute</span>
+            <span class="legend-item"><span class="dot olive"></span>Moyenne</span>
+          </div>
+        </div>
+        <div id="criticiteChart" class="chart-body"></div>
+      </div>
+    </div>
+
+    <!-- Section 3: Performance (Barres + Lignes) -->
+    <div class="section-header">
+      <h2>Performance & Bien-être</h2>
+      <span class="section-line"></span>
+    </div>
+    <div class="charts-row three-cols">
+      <div class="chart-card wide">
+        <div class="chart-header">
+          <h3>Points par Collaborateur</h3>
+          <span class="chart-badge">Top 10</span>
+        </div>
+        <div id="pointsParCollabChart" class="chart-body"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Mood</h3>
+          <span class="chart-badge">Équipe</span>
+        </div>
+        <div id="moodChart" class="chart-body"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Satisfaction</h3>
+          <span class="chart-badge">Moyenne</span>
+        </div>
+        <div id="satisfactionChart" class="chart-body"></div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,80 @@
+<div class="app-layout">
+
+  <div class="main-content">
+
+    <div class="content">
+
+      <h1>Équipe &amp; Satisfaction</h1>
+      <p class="subtitle">Suivi de la satisfaction des collaborateurs</p>
+
+      <div class="filter-container">
+        <span>Filtrer par parcours :</span>
+        <div class="filter-actions">
+
+          <button
+            [class.active]="selectedPracticeId === null"
+            (click)="filterByPractice(null)">
+            Tous
+          </button>
+
+          <button
+            *ngFor="let practice of practices"
+            [class.active]="selectedPracticeId === practice._id"
+            (click)="filterByPractice(practice._id)">
+            {{ practice.name }}
+          </button>
+
+        </div>
+      </div>
+
+      <section class="attention-section">
+        <h3>⚠️ Collaborateurs nécessitant une attention</h3>
+        <p>Ces personnes ont un mood difficile</p>
+
+        <div *ngIf="collaborateursEnAlerte.length === 0" class="no-alert">
+          ✅ Aucun collaborateur en difficulté actuellement.
+        </div>
+
+        <div class="attention-card" *ngFor="let collab of collaborateursEnAlerte">
+          <div class="employee-info">
+            <div class="employee-avatar">{{ collab.first_name.charAt(0) }}</div>
+            <div>
+              <strong>{{ collab.first_name }} {{ collab.last_name }}</strong>
+              <div class="employee-meta">{{ collab.role }}</div>
+            </div>
+          </div>
+
+          <div class="employee-metrics">
+            <div>Mood {{ getMoodEmoji(getLastMood(collab)) }}</div>
+            <div>Satisfaction {{ getLastSatisfaction(collab) }} / 5</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="employee-list">
+        <h3>Tous les collaborateurs</h3>
+
+        <div *ngIf="collaborateurs.length === 0" class="no-data">
+          Aucun collaborateur trouvé.
+        </div>
+
+        <div class="employee-row" *ngFor="let collab of collaborateurs">
+          <div class="employee-info">
+            <!-- ✅ Correction warning NG8107 : ?. → . -->
+            <div class="employee-avatar">{{ collab.first_name.charAt(0) }}</div>
+            <div>
+              <strong>{{ collab.first_name }} {{ collab.last_name }}</strong>
+              <div class="employee-meta">{{ collab.role }}</div>
+            </div>
+          </div>
+
+          <div class="employee-metrics">
+            <div class="badge">Mood {{ getMoodEmoji(getLastMood(collab)) }} {{ getMoodLabel(collab) }}</div>
+            <div class="badge">{{ getLastSatisfaction(collab) }} ★</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>

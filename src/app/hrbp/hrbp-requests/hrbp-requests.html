@@ -1,0 +1,680 @@
+<!-- hrbp-requests.html -->
+<div class="hr-page">
+
+  <div class="hr-header">
+    <h1 class="hr-title">Demandes & Réclamations</h1>
+    <p class="hr-sub">Messages reçus de vos collaborateurs et managers concernant les points de suivi.</p>
+  </div>
+
+  <div class="hr-tabs">
+    <button class="hr-tab" [class.active]="activeTab==='requests'" (click)="switchTab('requests')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+      Demandes de point
+      <span class="hr-tab-b hr-tab-b-blue" *ngIf="pendingReqs() > 0">{{ pendingReqs() }}</span>
+    </button>
+    <button class="hr-tab" [class.active]="activeTab==='reclamations'" (click)="switchTab('reclamations')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      Réclamations
+      <span class="hr-tab-b hr-tab-b-amber" *ngIf="pendingRecs() > 0">{{ pendingRecs() }}</span>
+    </button>
+  </div>
+
+  <!-- ════════ DEMANDES ════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'requests'">
+    <div class="hr-state" *ngIf="loadingReq"><span class="hr-spin"></span><p>Chargement…</p></div>
+
+    <div class="hr-state" *ngIf="!loadingReq && requests.length === 0">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+      <p class="hr-empty-t">Aucune demande</p>
+      <p class="hr-empty-s">Vos collaborateurs et managers n'ont pas encore envoyé de demandes.</p>
+    </div>
+
+    <ng-container *ngIf="!loadingReq && requests.length > 0">
+
+      <!-- ── En attente ── -->
+      <div class="hr-list" *ngIf="pendingRequests.length > 0">
+        <div class="hr-row" *ngFor="let r of pendingRequests" (click)="openReqDrawer(r)">
+          <div class="hr-row-ico hr-ico-blue">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </div>
+          <div class="hr-row-body">
+            <div class="hr-row-title">{{ r.titre }}</div>
+            <div class="hr-row-meta">
+              <span class="hr-mi">
+                <span class="hr-type-badge" [ngClass]="getTypeClass(getRequesterType(r))">
+                  {{ getTypeLabel(getRequesterType(r)) }}
+                </span>
+              </span>
+              <span class="hr-mi hr-mi-person">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/>
+                </svg>
+                <strong>{{ getRequesterName(r) }}</strong>
+              </span>
+              <span class="hr-mi hr-mi-blue">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Date souhaitée : {{ fmtDate(r.date_souhaitee) }}
+              </span>
+              <span class="hr-mi" style="color:#9ca3af">{{ fmtDate(r.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="hr-row-right">
+            <span class="hr-b" [ngClass]="msgCls(r.status)">{{ msgLbl(r.status) }}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ Séparateur — Traitées -->
+      <div class="hr-section-divider" *ngIf="processedRequests.length > 0">
+        <span class="hr-section-divider-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Traitées ({{ processedRequests.length }})
+        </span>
+      </div>
+
+      <div class="hr-list hr-list-processed" *ngIf="processedRequests.length > 0">
+        <div class="hr-row hr-row-processed" *ngFor="let r of processedRequests" (click)="openReqDrawer(r)">
+          <div class="hr-row-ico hr-ico-blue">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </div>
+          <div class="hr-row-body">
+            <div class="hr-row-title">{{ r.titre }}</div>
+            <div class="hr-row-meta">
+              <span class="hr-mi">
+                <span class="hr-type-badge" [ngClass]="getTypeClass(getRequesterType(r))">
+                  {{ getTypeLabel(getRequesterType(r)) }}
+                </span>
+              </span>
+              <span class="hr-mi hr-mi-person">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/>
+                </svg>
+                <strong>{{ getRequesterName(r) }}</strong>
+              </span>
+              <span class="hr-mi hr-mi-blue">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Date souhaitée : {{ fmtDate(r.date_souhaitee) }}
+              </span>
+              <span class="hr-mi" style="color:#9ca3af">{{ fmtDate(r.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="hr-row-right">
+            <span class="hr-b" [ngClass]="msgCls(r.status)">{{ msgLbl(r.status) }}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ❌ Séparateur — Refusées -->
+      <div class="hr-section-divider hr-section-divider-red" *ngIf="rejectedRequests.length > 0">
+        <span class="hr-section-divider-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Refusées ({{ rejectedRequests.length }})
+        </span>
+      </div>
+
+      <div class="hr-list hr-list-rejected" *ngIf="rejectedRequests.length > 0">
+        <div class="hr-row hr-row-rejected" *ngFor="let r of rejectedRequests" (click)="openReqDrawer(r)">
+          <div class="hr-row-ico hr-ico-blue">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </div>
+          <div class="hr-row-body">
+            <div class="hr-row-title">{{ r.titre }}</div>
+            <div class="hr-row-meta">
+              <span class="hr-mi">
+                <span class="hr-type-badge" [ngClass]="getTypeClass(getRequesterType(r))">
+                  {{ getTypeLabel(getRequesterType(r)) }}
+                </span>
+              </span>
+              <span class="hr-mi hr-mi-person">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/>
+                </svg>
+                <strong>{{ getRequesterName(r) }}</strong>
+              </span>
+              <span class="hr-mi hr-mi-blue">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Date souhaitée : {{ fmtDate(r.date_souhaitee) }}
+              </span>
+              <span class="hr-mi" style="color:#9ca3af">{{ fmtDate(r.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="hr-row-right">
+            <span class="hr-b" [ngClass]="msgCls(r.status)">{{ msgLbl(r.status) }}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+  </ng-container>
+
+  <!-- ════════ RÉCLAMATIONS ════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'reclamations'">
+    <div class="hr-state" *ngIf="loadingRec"><span class="hr-spin"></span><p>Chargement…</p></div>
+
+    <div class="hr-state" *ngIf="!loadingRec && reclamations.length === 0">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <p class="hr-empty-t">Aucune réclamation</p>
+      <p class="hr-empty-s">Aucune réclamation de vos collaborateurs ou managers pour l'instant.</p>
+    </div>
+
+    <ng-container *ngIf="!loadingRec && reclamations.length > 0">
+
+      <!-- ── En attente ── -->
+      <div class="hr-list" *ngIf="pendingReclamations.length > 0">
+        <div class="hr-row" *ngFor="let r of pendingReclamations" (click)="openRecDrawer(r)">
+          <div class="hr-row-ico hr-ico-amber">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="hr-row-body">
+            <div class="hr-row-title">{{ r.titre }}</div>
+            <div class="hr-row-meta">
+              <span class="hr-mi">
+                <span class="hr-type-badge" [ngClass]="getTypeClass(getClaimantType(r))">
+                  {{ getTypeLabel(getClaimantType(r)) }}
+                </span>
+              </span>
+              <span class="hr-mi hr-mi-person">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/>
+                </svg>
+                <strong>{{ getClaimantName(r) }}</strong>
+              </span>
+              <span class="hr-mi hr-mi-amber" *ngIf="r.point_id">
+                Point : <strong>{{ r.point_id.titre }}</strong>
+              </span>
+              <span class="hr-mi hr-mi-blue" *ngIf="r.nouvelle_date_proposee">
+                → {{ fmtDate(r.nouvelle_date_proposee) }}
+              </span>
+              <span class="hr-mi" style="color:#9ca3af">{{ fmtDate(r.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="hr-row-right">
+            <span class="hr-b" [ngClass]="msgCls(r.status)">{{ msgLbl(r.status) }}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ Séparateur — Traitées -->
+      <div class="hr-section-divider" *ngIf="processedReclamations.length > 0">
+        <span class="hr-section-divider-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Traitées ({{ processedReclamations.length }})
+        </span>
+      </div>
+
+      <div class="hr-list hr-list-processed" *ngIf="processedReclamations.length > 0">
+        <div class="hr-row hr-row-processed" *ngFor="let r of processedReclamations" (click)="openRecDrawer(r)">
+          <div class="hr-row-ico hr-ico-amber">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="hr-row-body">
+            <div class="hr-row-title">{{ r.titre }}</div>
+            <div class="hr-row-meta">
+              <span class="hr-mi">
+                <span class="hr-type-badge" [ngClass]="getTypeClass(getClaimantType(r))">
+                  {{ getTypeLabel(getClaimantType(r)) }}
+                </span>
+              </span>
+              <span class="hr-mi hr-mi-person">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/>
+                </svg>
+                <strong>{{ getClaimantName(r) }}</strong>
+              </span>
+              <span class="hr-mi hr-mi-amber" *ngIf="r.point_id">
+                Point : <strong>{{ r.point_id.titre }}</strong>
+              </span>
+              <span class="hr-mi hr-mi-blue" *ngIf="r.nouvelle_date_proposee">
+                → {{ fmtDate(r.nouvelle_date_proposee) }}
+              </span>
+              <span class="hr-mi" style="color:#9ca3af">{{ fmtDate(r.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="hr-row-right">
+            <span class="hr-b" [ngClass]="msgCls(r.status)">{{ msgLbl(r.status) }}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ❌ Séparateur — Refusées -->
+      <div class="hr-section-divider hr-section-divider-red" *ngIf="rejectedReclamations.length > 0">
+        <span class="hr-section-divider-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Refusées ({{ rejectedReclamations.length }})
+        </span>
+      </div>
+
+      <div class="hr-list hr-list-rejected" *ngIf="rejectedReclamations.length > 0">
+        <div class="hr-row hr-row-rejected" *ngFor="let r of rejectedReclamations" (click)="openRecDrawer(r)">
+          <div class="hr-row-ico hr-ico-amber">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="hr-row-body">
+            <div class="hr-row-title">{{ r.titre }}</div>
+            <div class="hr-row-meta">
+              <span class="hr-mi">
+                <span class="hr-type-badge" [ngClass]="getTypeClass(getClaimantType(r))">
+                  {{ getTypeLabel(getClaimantType(r)) }}
+                </span>
+              </span>
+              <span class="hr-mi hr-mi-person">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/>
+                </svg>
+                <strong>{{ getClaimantName(r) }}</strong>
+              </span>
+              <span class="hr-mi hr-mi-amber" *ngIf="r.point_id">
+                Point : <strong>{{ r.point_id.titre }}</strong>
+              </span>
+              <span class="hr-mi hr-mi-blue" *ngIf="r.nouvelle_date_proposee">
+                → {{ fmtDate(r.nouvelle_date_proposee) }}
+              </span>
+              <span class="hr-mi" style="color:#9ca3af">{{ fmtDate(r.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="hr-row-right">
+            <span class="hr-b" [ngClass]="msgCls(r.status)">{{ msgLbl(r.status) }}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+  </ng-container>
+
+</div><!-- /hr-page -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     DRAWER — DÉTAIL DEMANDE
+═══════════════════════════════════════════════════════════════ -->
+<div *ngIf="showReqDrawer" class="hr-overlay" (click)="closeReqDrawer()">
+  <div class="hr-drawer" (click)="$event.stopPropagation()">
+
+    <div class="hr-dhead">
+      <div class="hr-dhead-l">
+        <div class="hr-dico hr-dico-blue">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </div>
+        <div>
+          <p class="hr-dtitle">Demande de point</p>
+          <p class="hr-dsubtitle" *ngIf="selectedReq">
+            De la part d'un <strong>{{ getTypeLabel(getRequesterType(selectedReq)) }}</strong>
+          </p>
+        </div>
+      </div>
+      <button class="hr-dclose" (click)="closeReqDrawer()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="hr-dbody" *ngIf="selectedReq">
+      <div class="hr-ok" *ngIf="pointOk">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+        </svg>
+        <p>Point créé avec succès !</p>
+      </div>
+
+      <ng-container *ngIf="!pointOk">
+        <div class="hr-section">
+          <p class="hr-slbl">Demande</p>
+          <h2 class="hr-dname">{{ selectedReq.titre }}</h2>
+          <p class="hr-ddesc" *ngIf="selectedReq.commentaire">{{ selectedReq.commentaire }}</p>
+          <div class="hr-dmeta">
+            <span class="hr-mi hr-mi-blue">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              Date souhaitée : <strong>{{ fmtDate(selectedReq.date_souhaitee) }}</strong>
+            </span>
+            <span class="hr-mi" style="color:#9ca3af">Reçue le {{ fmtDate(selectedReq.createdAt) }}</span>
+          </div>
+          <span class="hr-b" [ngClass]="msgCls(selectedReq.status)">{{ msgLbl(selectedReq.status) }}</span>
+        </div>
+
+        <div class="hr-section">
+          <p class="hr-slbl">Demandeur</p>
+          <div class="hr-collab">
+            <div class="hr-av" [ngClass]="'hr-av-' + getRequesterType(selectedReq).toLowerCase()">
+              <span *ngIf="!(selectedReq.requester?.photo_url || selectedReq.collaborateur?.photo_url)">
+                {{ (getRequesterName(selectedReq) || '?')[0] }}
+              </span>
+              <img *ngIf="selectedReq.requester?.photo_url" [src]="selectedReq.requester!.photo_url" />
+              <img *ngIf="!selectedReq.requester?.photo_url && selectedReq.collaborateur?.photo_url" [src]="selectedReq.collaborateur!.photo_url" />
+            </div>
+            <div class="hr-collab-info">
+              <div class="hr-collab-header">
+                <p class="hr-cn">{{ getRequesterName(selectedReq) }}</p>
+                <span class="hr-type-badge-lg" [ngClass]="getTypeClass(getRequesterType(selectedReq))">
+                  {{ getTypeLabel(getRequesterType(selectedReq)) }}
+                </span>
+              </div>
+              <p class="hr-ce">{{ selectedReq.requester?.email || selectedReq.collaborateur?.email }}</p>
+              <p class="hr-cgrade" *ngIf="selectedReq.requester?.grade || selectedReq.collaborateur?.grade">
+                {{ selectedReq.requester?.grade || selectedReq.collaborateur?.grade }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hr-section" *ngIf="selectedReq.status === 'PENDING'">
+          <button class="hr-btn-create" *ngIf="!showPointForm" (click)="openPointForm()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+              <line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Créer le point
+          </button>
+
+          <div class="hr-pform" *ngIf="showPointForm">
+            <p class="hr-slbl">Créer le point de suivi</p>
+            <div class="hr-field">
+              <label class="hr-lbl">Titre *</label>
+              <input class="hr-inp" [(ngModel)]="pointForm.titre" placeholder="Titre du point" />
+            </div>
+            <div class="hr-field">
+              <label class="hr-lbl">Date *</label>
+              <input class="hr-inp hr-inp-date" type="date" [(ngModel)]="pointForm.date" />
+            </div>
+            <div class="hr-field">
+              <label class="hr-lbl">Description</label>
+              <textarea class="hr-ta" rows="3" [(ngModel)]="pointForm.description"
+                        placeholder="Description du point…"></textarea>
+            </div>
+            <div class="hr-field-row">
+              <div class="hr-field">
+                <label class="hr-lbl">Criticité</label>
+                <select class="hr-sel" [(ngModel)]="pointForm.criticite">
+                  <option value="Basse">Basse</option>
+                  <option value="Moyenne">Moyenne</option>
+                  <option value="Haute">Haute</option>
+                </select>
+              </div>
+              <div class="hr-field">
+                <label class="hr-lbl">Durée estimée</label>
+                <input class="hr-inp" [(ngModel)]="pointForm.duree_estimee" placeholder="Ex : 30 min" />
+              </div>
+            </div>
+            <div class="hr-pform-actions">
+              <button class="hr-btn-cancel" (click)="showPointForm = false">Annuler</button>
+              <button class="hr-btn-green"
+                      [disabled]="!pointForm.titre.trim() || !pointForm.date || savingPoint"
+                      (click)="createPoint()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {{ savingPoint ? 'Création…' : 'Créer le point' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="hr-dfoot" *ngIf="selectedReq?.status === 'PENDING' && !showPointForm && !pointOk">
+      <button class="hr-btn-reject" (click)="rejectRequest()">Refuser la demande</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     DRAWER — DÉTAIL RÉCLAMATION
+═══════════════════════════════════════════════════════════════ -->
+<div *ngIf="showRecDrawer" class="hr-overlay" (click)="closeRecDrawer()">
+  <div class="hr-drawer" (click)="$event.stopPropagation()">
+
+    <div class="hr-dhead">
+      <div class="hr-dhead-l">
+        <div class="hr-dico hr-dico-amber">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div>
+          <p class="hr-dtitle">Réclamation</p>
+          <p class="hr-dsubtitle" *ngIf="selectedRec">
+            De la part d'un <strong>{{ getTypeLabel(getClaimantType(selectedRec)) }}</strong>
+          </p>
+        </div>
+      </div>
+      <button class="hr-dclose" (click)="closeRecDrawer()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="hr-dbody" *ngIf="selectedRec">
+      <div class="hr-ok" *ngIf="recOk">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+        </svg>
+        <p>Point modifié et réclamation traitée !</p>
+      </div>
+
+      <ng-container *ngIf="!recOk">
+        <div class="hr-section">
+          <p class="hr-slbl">Réclamation</p>
+          <h2 class="hr-dname">{{ selectedRec.titre }}</h2>
+          <p class="hr-ddesc" *ngIf="selectedRec.commentaire">{{ selectedRec.commentaire }}</p>
+          <div class="hr-dmeta">
+            <span class="hr-mi" style="color:#9ca3af">Reçue le {{ fmtDate(selectedRec.createdAt) }}</span>
+          </div>
+          <span class="hr-b" [ngClass]="msgCls(selectedRec.status)">{{ msgLbl(selectedRec.status) }}</span>
+        </div>
+
+        <div class="hr-section" *ngIf="selectedRec.point_id">
+          <p class="hr-slbl">Point concerné</p>
+          <div class="hr-pcard">
+            <div class="hr-pcard-top">
+              <strong>{{ selectedRec.point_id.titre }}</strong>
+              <span class="hr-ps hr-ps-sm" [ngClass]="pointStatusCls(selectedRec.point_id.status)">
+                {{ selectedRec.point_id.status }}
+              </span>
+            </div>
+            <div class="hr-pcard-meta">
+              <span class="hr-mi">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Date actuelle : {{ fmtDate(selectedRec.point_id.date) }}
+              </span>
+              <span class="hr-mi hr-mi-amber" *ngIf="selectedRec.nouvelle_date_proposee">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+                Nouvelle date proposée : <strong>{{ fmtDate(selectedRec.nouvelle_date_proposee) }}</strong>
+              </span>
+            </div>
+            <p class="hr-pdesc" *ngIf="selectedRec.point_id.description">
+              {{ selectedRec.point_id.description }}
+            </p>
+            <div class="hr-snapshot" *ngIf="selectedRec.point_snapshot?.titre">
+              <p class="hr-snapshot-lbl">Snapshot au moment de la réclamation</p>
+              <div class="hr-snapshot-row" *ngIf="selectedRec.point_snapshot?.date">
+                <span>Date :</span><strong>{{ fmtDate(selectedRec.point_snapshot?.date) }}</strong>
+              </div>
+              <div class="hr-snapshot-row" *ngIf="selectedRec.point_snapshot?.status">
+                <span>Statut :</span><strong>{{ selectedRec.point_snapshot?.status }}</strong>
+              </div>
+              <div class="hr-snapshot-row" *ngIf="selectedRec.point_snapshot?.criticite">
+                <span>Criticité :</span><strong>{{ selectedRec.point_snapshot?.criticite }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hr-section" *ngIf="selectedRec.status === 'PENDING' && selectedRec.point_id && !showEditForm">
+          <button class="hr-btn-edit" (click)="openEditForm()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Modifier le point
+          </button>
+        </div>
+
+        <div class="hr-pform hr-editform" *ngIf="selectedRec.status === 'PENDING' && showEditForm">
+          <div class="hr-editform-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            <p class="hr-slbl" style="margin:0">Modifier le point selon la réclamation</p>
+          </div>
+          <div class="hr-field">
+            <label class="hr-lbl">Titre *</label>
+            <input class="hr-inp" [(ngModel)]="editForm.titre" placeholder="Titre du point" />
+          </div>
+          <div class="hr-field-row">
+            <div class="hr-field">
+              <label class="hr-lbl">Date *</label>
+              <input class="hr-inp hr-inp-date" type="date" [(ngModel)]="editForm.date" />
+            </div>
+            <div class="hr-field">
+              <label class="hr-lbl">Statut</label>
+              <select class="hr-sel" [(ngModel)]="editForm.status">
+                <option value="En attente">En attente</option>
+                <option value="En cours">En cours</option>
+                <option value="Terminé">Terminé</option>
+                <option value="Annulé">Annulé</option>
+              </select>
+            </div>
+          </div>
+          <div class="hr-field">
+            <label class="hr-lbl">Description</label>
+            <textarea class="hr-ta" rows="3" [(ngModel)]="editForm.description"
+                      placeholder="Description du point…"></textarea>
+          </div>
+          <div class="hr-field-row">
+            <div class="hr-field">
+              <label class="hr-lbl">Criticité</label>
+              <select class="hr-sel" [(ngModel)]="editForm.criticite">
+                <option value="Basse">Basse</option>
+                <option value="Moyenne">Moyenne</option>
+                <option value="Haute">Haute</option>
+              </select>
+            </div>
+            <div class="hr-field">
+              <label class="hr-lbl">Durée estimée</label>
+              <input class="hr-inp" [(ngModel)]="editForm.duree_estimee" placeholder="Ex : 30 min" />
+            </div>
+          </div>
+          <div class="hr-pform-actions">
+            <button class="hr-btn-cancel" (click)="showEditForm = false">Annuler</button>
+            <button class="hr-btn-green"
+                    [disabled]="!editForm.titre.trim() || !editForm.date || savingEdit"
+                    (click)="saveEditAndProcess()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              {{ savingEdit ? 'Enregistrement…' : 'Enregistrer et traiter' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="hr-section">
+          <p class="hr-slbl">Réclamant</p>
+          <div class="hr-collab">
+            <div class="hr-av" [ngClass]="'hr-av-' + getClaimantType(selectedRec).toLowerCase()">
+              <span *ngIf="!(selectedRec.claimant?.photo_url || selectedRec.collaborateur?.photo_url)">
+                {{ (getClaimantName(selectedRec) || '?')[0] }}
+              </span>
+              <img *ngIf="selectedRec.claimant?.photo_url" [src]="selectedRec.claimant!.photo_url" />
+              <img *ngIf="!selectedRec.claimant?.photo_url && selectedRec.collaborateur?.photo_url" [src]="selectedRec.collaborateur!.photo_url" />
+            </div>
+            <div class="hr-collab-info">
+              <div class="hr-collab-header">
+                <p class="hr-cn">{{ getClaimantName(selectedRec) }}</p>
+                <span class="hr-type-badge-lg" [ngClass]="getTypeClass(getClaimantType(selectedRec))">
+                  {{ getTypeLabel(getClaimantType(selectedRec)) }}
+                </span>
+              </div>
+              <p class="hr-ce">{{ selectedRec.claimant?.email || selectedRec.collaborateur?.email }}</p>
+              <p class="hr-cgrade" *ngIf="selectedRec.claimant?.grade || selectedRec.collaborateur?.grade">
+                {{ selectedRec.claimant?.grade || selectedRec.collaborateur?.grade }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="hr-dfoot" *ngIf="selectedRec?.status === 'PENDING' && !showEditForm && !recOk">
+      <button class="hr-btn-reject" (click)="rejectReclamation()">Refuser la réclamation</button>
+    </div>
+  </div>
+</div>

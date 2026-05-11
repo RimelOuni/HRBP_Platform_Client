@@ -1,0 +1,315 @@
+/* ===== MY-BADGES ===== */
+
+app-my-badges { display: block; }
+
+app-my-badges .mb-wrap {
+  padding: 32px 24px 56px;
+  max-width: 860px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ── HEADER ── */
+app-my-badges .mb-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+app-my-badges .mb-title {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 5px;
+  letter-spacing: -0.5px;
+}
+app-my-badges .mb-sub {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin: 0;
+}
+app-my-badges .mb-pts-chip {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1.5px solid #86efac;
+  border-radius: 50px;
+  padding: 8px 18px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── STATES ── */
+app-my-badges .mb-state {
+  text-align: center;
+  padding: 72px 20px;
+  color: #9ca3af;
+  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+app-my-badges .mb-state--error { color: #dc2626; }
+app-my-badges .mb-spinner {
+  width: 24px; height: 24px;
+  border: 2.5px solid #bbf7d0;
+  border-top-color: #16a34a;
+  border-radius: 50%;
+  animation: mb-spin 0.7s linear infinite;
+}
+@keyframes mb-spin { to { transform: rotate(360deg); } }
+
+/* ── NEXT BADGE PROGRESS ── */
+app-my-badges .mb-next-card {
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  border-left: 5px solid #16a34a;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+app-my-badges .mb-next-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+app-my-badges .mb-next-icon {
+  font-size: 2rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: #f3f4f6;
+  border: 1.5px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  filter: grayscale(1) opacity(0.5);
+}
+app-my-badges .mb-next-name {
+  font-size: 0.97rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 3px;
+}
+app-my-badges .mb-next-hint {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+app-my-badges .mb-next-hint strong { color: #15803d; }
+app-my-badges .mb-progress-wrap {
+  flex: 1;
+  min-width: 160px;
+}
+app-my-badges .mb-progress-track {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 50px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+app-my-badges .mb-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #16a34a, #22c55e);
+  border-radius: 50px;
+  transition: width 0.6s ease;
+}
+app-my-badges .mb-progress-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* ── ALL DONE ── */
+app-my-badges .mb-all-done {
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  border: 1.5px solid #86efac;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+/* ── EMPTY ── */
+app-my-badges .mb-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+app-my-badges .mb-empty-icon { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+/* ── SECTION TITLES ── */
+app-my-badges .mb-section-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+app-my-badges .mb-section-title--locked { color: #6b7280; margin-top: 36px; }
+app-my-badges .mb-count {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 50px;
+  border: 1px solid #86efac;
+}
+app-my-badges .mb-count--locked {
+  background: #f3f4f6;
+  color: #6b7280;
+  border-color: #e5e7eb;
+}
+
+/* ── BADGE GRID ── */
+app-my-badges .mb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 8px;
+}
+app-my-badges .mb-grid--locked {
+  opacity: 0.65;
+}
+
+/* ── BADGE CARD ── */
+app-my-badges .mb-badge-card {
+  position: relative;
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 26px 18px 20px;
+  text-align: center;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+app-my-badges .mb-badge-card--earned {
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+app-my-badges .mb-badge-card--earned:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.14);
+}
+app-my-badges .mb-badge-card--locked {
+  background: #f9fafb;
+  cursor: default;
+}
+
+/* glow behind earned badge */
+app-my-badges .mb-badge-glow {
+  position: absolute;
+  top: -20px; left: 50%;
+  transform: translateX(-50%);
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  opacity: 0.12;
+  filter: blur(22px);
+  pointer-events: none;
+}
+
+/* ── BADGE CIRCLE ── */
+app-my-badges .mb-badge-circle {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  position: relative;
+  z-index: 1;
+  animation: mb-circlePop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+app-my-badges .mb-badge-circle--locked {
+  background: #e5e7eb !important;
+  box-shadow: none;
+  animation: none;
+}
+@keyframes mb-circlePop {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+app-my-badges .mb-badge-emoji {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.18));
+}
+app-my-badges .mb-badge-emoji--locked {
+  filter: grayscale(1) opacity(0.4);
+}
+
+/* ── BADGE TEXT ── */
+app-my-badges .mb-badge-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 6px;
+}
+app-my-badges .mb-badge-name--locked { color: #9ca3af; }
+app-my-badges .mb-badge-desc {
+  font-size: 0.76rem;
+  color: #9ca3af;
+  line-height: 1.55;
+  margin-bottom: 12px;
+}
+
+app-my-badges .mb-badge-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+app-my-badges .mb-badge-date {
+  font-size: 0.71rem;
+  color: #d1d5db;
+  font-weight: 600;
+}
+app-my-badges .mb-badge-pts {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.71rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 50px;
+  border: 1px solid #86efac;
+}
+
+app-my-badges .mb-badge-req {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 600;
+  background: #f3f4f6;
+  border-radius: 50px;
+  padding: 4px 12px;
+  display: inline-block;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  app-my-badges .mb-wrap { padding: 20px 14px 40px; }
+  app-my-badges .mb-grid { grid-template-columns: repeat(2, 1fr); }
+  app-my-badges .mb-next-card { flex-direction: column; align-items: flex-start; }
+  app-my-badges .mb-header { flex-direction: column; align-items: flex-start; }
+}

@@ -1,0 +1,264 @@
+<div class="page-wrapper">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">Points de Suivi</h1>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-card">
+    <div class="filters-row">
+
+      <div class="search-wrap">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M7 12A5 5 0 1 0 7 2a5 5 0 0 0 0 10zM14 14l-3.5-3.5"
+                stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <input type="text" class="search-input" placeholder="Rechercher par titre..."
+          [(ngModel)]="searchTitle" (input)="applyFilters()" />
+        <button *ngIf="searchTitle" class="search-clear" (click)="searchTitle=''; applyFilters()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M9 3L3 9M3 3l6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="search-wrap">
+        <input type="date" class="search-input" [(ngModel)]="searchDate" (change)="applyFilters()" />
+        <button *ngIf="searchDate" class="search-clear" (click)="searchDate=''; applyFilters()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M9 3L3 9M3 3l6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="select-wrap">
+        <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="">Tous les statuts</option>
+          <option value="En attente">En attente</option>
+          <option value="En cours">En cours</option>
+          <option value="Terminé">Terminé</option>
+          <option value="Annulé">Annulé</option>
+        </select>
+      </div>
+
+      <div class="select-wrap">
+        <select class="filter-select" [(ngModel)]="criticiteFilter" (change)="applyFilters()">
+          <option value="">Toutes les criticités</option>
+          <option value="Basse">Basse</option>
+          <option value="Moyenne">Moyenne</option>
+          <option value="Haute">Haute</option>
+        </select>
+      </div>
+<div class="select-wrap">
+  <select class="filter-select" [(ngModel)]="frequenceFilter" (change)="applyFilters()">
+    <option value="">Toutes les fréquences</option>
+    <option value="Ponctuel">Ponctuel</option>
+    <option value="Mensuel">Mensuel</option>
+    <option value="Trimestriel">Trimestriel</option>
+    <option value="Annuel">Annuel</option>
+  </select>
+</div>
+      <button *ngIf="hasActiveFilters()" class="clear-btn" (click)="clearAllFilters()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M9.5 3.5L3.5 9.5M3.5 3.5l6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        Clear
+      </button>
+    </div>
+
+    <!-- Active chips -->
+    <div class="chips-row" *ngIf="hasActiveFilters()">
+      <span class="chip" *ngIf="searchTitle">
+        "{{ searchTitle }}" <button (click)="searchTitle=''; applyFilters()">×</button>
+      </span>
+      <span class="chip" *ngIf="searchDate">
+        {{ searchDate }} <button (click)="searchDate=''; applyFilters()">×</button>
+      </span>
+      <span class="chip" *ngIf="statusFilter">
+        {{ statusFilter }} <button (click)="statusFilter=''; applyFilters()">×</button>
+      </span>
+      <span class="chip" *ngIf="criticiteFilter">
+        {{ criticiteFilter }} <button (click)="criticiteFilter=''; applyFilters()">×</button>
+      </span>
+      <span class="chip" *ngIf="frequenceFilter">
+  {{ frequenceFilter }} <button (click)="frequenceFilter=''; applyFilters()">×</button>
+</span>
+    </div>
+  </div>
+
+<!-- Table Section -->
+<!-- ... reste du template inchangé ... -->
+<!-- Table Section -->
+<section class="table-section">
+  <div class="table-header">
+    <div class="title-wrapper">
+      <h3 class="table-title">Points de Suivi</h3>
+      <span class="point-count" *ngIf="!isLoading">{{ filteredPoints.length }} point(s)</span>
+    </div>
+
+    <div class="header-right">
+      <button (click)="goToAddPoint()" class="create-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 2V12M2 7H12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Créer un point
+      </button>
+
+      <!-- Export Actions -->
+      <div class="export-actions" *ngIf="selectedPoints.length > 0">
+        <span class="selected-count">
+          <span class="count-badge">{{ selectedPoints.length }}</span>
+          sélectionné(s)
+        </span>
+        <button (click)="exportToExcel()" class="export-btn csv-btn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 9.5L4 6.5H6V2H8V6.5H10L7 9.5Z" fill="currentColor"/>
+            <path d="M2 11H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Excel
+        </button>
+        <button (click)="exportToPDF()" class="export-btn pdf-btn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 9.5L4 6.5H6V2H8V6.5H10L7 9.5Z" fill="currentColor"/>
+            <path d="M2 11H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          PDF
+        </button>
+        <button (click)="clearSelection()" class="clear-btn" title="Désélectionner tout">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 2L10 10M10 2L2 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="state-container">
+    <div class="spinner"></div>
+    <p class="state-text">Chargement des points...</p>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!isLoading && filteredPoints.length === 0" class="state-container empty-state">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" class="empty-icon">
+      <rect x="8" y="8" width="32" height="36" rx="4" stroke="#d1d5db" stroke-width="2"/>
+      <path d="M16 20H32M16 28H26" stroke="#d1d5db" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <p class="state-text">Aucun point trouvé</p>
+    <p class="state-subtext">Essayez de modifier vos filtres</p>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper" *ngIf="!isLoading && filteredPoints.length > 0">
+    <table class="points-table" role="grid">
+      <thead>
+        <tr>
+          <th class="checkbox-col">
+            <input
+              type="checkbox"
+              [checked]="isAllSelected()"
+              (change)="toggleSelectAll()"
+              class="checkbox"
+              aria-label="Tout sélectionner"
+            />
+          </th>
+
+          <th>Invité</th>
+          <th>Titre</th>
+          <th>Date</th>
+          <th>Statut</th>
+          <th>Criticité</th>
+          <th>Durée</th>
+          <th>Fréquence</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let point of filteredPoints; trackBy: trackByPointId"
+          [class.selected-row]="isSelected(point._id)"
+          class="table-row">
+
+          <td class="checkbox-col" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="isSelected(point._id)"
+              (change)="toggleSelection(point._id)"
+              class="checkbox"
+            />
+          </td>
+              <!-- INVITE CELL — fixed -->
+          <td (click)="viewDetails(point._id)" class="clickable">
+            {{ getInviteLabel(point.invite) }}
+          </td>
+
+          <td (click)="viewDetails(point._id)" class="clickable title-cell">
+            {{ point.titre || '—' }}
+          </td>
+
+
+          <td (click)="viewDetails(point._id)" class="clickable date-col">
+            {{ formatDate(point.date) }}
+          </td>
+
+          <td (click)="viewDetails(point._id)" class="clickable">
+            <span class="badge" [ngClass]="getStatusClass(point.status || '')">
+              {{ point.status }}
+            </span>
+          </td>
+
+          <td (click)="viewDetails(point._id)" class="clickable">
+            <span class="badge" [ngClass]="getCriticiteClass(point.criticite || '')">
+              {{ point.criticite }}
+            </span>
+          </td>
+
+          <td (click)="viewDetails(point._id)" class="clickable secondary-col">
+            {{ point.duree_estimee || '—' }}
+          </td>
+
+          <td (click)="viewDetails(point._id)" class="clickable secondary-col">
+            {{ point.frequence || '—' }}
+          </td>
+
+          <td class="actions-col">
+            <button
+              (click)="viewDetails(point._id); $event.stopPropagation()"
+              class="action-btn"
+              [title]="'Voir les détails de ' + point.titre">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="7" cy="7" r="2" fill="currentColor"/>
+              </svg>
+              Détails
+            </button>
+
+            <button
+              (click)="editPoint(point._id); $event.stopPropagation()"
+              class="action-btn edit-btn"
+              [title]="'Modifier ' + point.titre">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M9.5 2.5L11.5 4.5L5 11H3V9L9.5 2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M8 4L10 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              Modifier
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Export Overlay -->
+<div *ngIf="isExporting" class="export-overlay">
+  <div class="export-modal">
+    <div class="spinner"></div>
+    <p class="state-text">Génération du fichier...</p>
+    <p class="state-subtext">Cela peut prendre quelques instants</p>
+  </div>
+</div>

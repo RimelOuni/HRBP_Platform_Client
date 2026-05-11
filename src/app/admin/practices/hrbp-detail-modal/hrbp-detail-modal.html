@@ -1,0 +1,332 @@
+<div class="hrbp-modal-overlay" (click)="onClose()">
+  <div class="hrbp-modal-content" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div class="header-info">
+        <button class="back-btn" (click)="onClose()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+        </button>
+        <div class="header-text">
+          <h2 class="modal-title">{{ practice.name }}</h2>
+          <p class="hrbp-name">HRBP : {{ getHrbpFullName() }}</p>
+          <p class="hrbp-email" *ngIf="hrbp.email">{{ hrbp.email }}</p>
+        </div>
+      </div>
+      <button class="close-btn" (click)="onClose()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- ERROR -->
+    <div *ngIf="hasError" class="alert alert-error">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-bar">
+      <button class="tab-btn" [class.tab-active]="activeTab === 'collaborators'"
+              (click)="setTab('collaborators')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Collaborateurs
+        <span class="tab-count">{{ collaborators.length }}</span>
+      </button>
+      <button class="tab-btn" [class.tab-active]="activeTab === 'managers'"
+              (click)="setTab('managers')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="7" width="20" height="14" rx="2"></rect>
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+        </svg>
+        Managers
+        <span class="tab-count">{{ managers.length }}</span>
+      </button>
+    </div>
+
+    <!-- ═══════ ONGLET COLLABORATEURS ═══════ -->
+    <div *ngIf="activeTab === 'collaborators'" class="collaborators-section">
+      <div class="section-header">
+        <div>
+          <h3 class="section-title">Collaborateurs assignés</h3>
+          <p class="section-subtitle">{{ collaborators.length }} au total</p>
+        </div>
+        <button class="btn btn-primary btn-sm" (click)="onAddCollaborators()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Ajouter
+        </button>
+      </div>
+
+      <div class="search-field">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="search-input" placeholder="Rechercher un collaborateur..."
+               [(ngModel)]="searchCollaborators" (input)="onCollaboratorSearchChange()">
+      </div>
+
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div><p>Chargement...</p>
+      </div>
+
+      <div *ngIf="!isLoading" class="table-wrapper">
+        <table class="collaborators-table">
+          <thead class="table-head">
+            <tr>
+              <th>Nom</th><th>Email</th><th>Grade</th>
+              <th>Entrée</th><th>Statut</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+            <tr *ngFor="let collab of filteredCollaborators" class="table-row">
+              <td>
+                <div class="collab-cell">
+                  <div class="collab-avatar">
+                    {{ collab.first_name.charAt(0) }}{{ collab.last_name.charAt(0) }}
+                  </div>
+                  <span class="collab-name">{{ collab.first_name }} {{ collab.last_name }}</span>
+                </div>
+              </td>
+              <td><span class="collab-email">{{ collab.email }}</span></td>
+              <td><span class="grade-badge">{{ collab.grade || '-' }}</span></td>
+              <td><span class="date-text">{{ formatDate(collab.date_entree) }}</span></td>
+              <td>
+                <span class="status-badge"
+                      [ngClass]="collab.is_active ? 'status-active' : 'status-inactive'">
+                  {{ collab.is_active ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td>
+                <button class="btn-action btn-delete"
+                        (click)="onRemoveCollaborator(collab._id)" title="Retirer">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="hasNoCollaborators()" class="empty-state-row">
+              <td colspan="6" class="empty-state-cell">
+                <div class="empty-state-content">
+                  <p class="empty-state-text">Aucun collaborateur assigné</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════ ONGLET MANAGERS ═══════ -->
+    <div *ngIf="activeTab === 'managers'" class="collaborators-section">
+      <div class="section-header">
+        <div>
+          <h3 class="section-title">Managers assignés</h3>
+          <p class="section-subtitle">{{ managers.length }} au total</p>
+        </div>
+        <button class="btn btn-primary btn-sm" (click)="onAddManagers()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Ajouter
+        </button>
+      </div>
+
+      <div class="search-field">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="search-input" placeholder="Rechercher un manager..."
+               [(ngModel)]="searchManagers" (input)="onManagerSearchChange()">
+      </div>
+
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div><p>Chargement...</p>
+      </div>
+
+      <div *ngIf="!isLoading" class="table-wrapper">
+        <table class="collaborators-table">
+          <thead class="table-head">
+            <tr>
+              <th>Nom</th><th>Email</th><th>Grade</th>
+              <th>Entrée</th><th>Statut</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+            <tr *ngFor="let mgr of filteredManagers" class="table-row">
+              <td>
+                <div class="collab-cell">
+                  <div class="collab-avatar manager-avatar">
+                    {{ mgr.first_name.charAt(0) }}{{ mgr.last_name.charAt(0) }}
+                  </div>
+                  <span class="collab-name">{{ mgr.first_name }} {{ mgr.last_name }}</span>
+                </div>
+              </td>
+              <td><span class="collab-email">{{ mgr.email }}</span></td>
+              <td><span class="grade-badge">{{ mgr.grade || '-' }}</span></td>
+              <td><span class="date-text">{{ formatDate(mgr.date_entree) }}</span></td>
+              <td>
+                <span class="status-badge"
+                      [ngClass]="mgr.is_active ? 'status-active' : 'status-inactive'">
+                  {{ mgr.is_active ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td>
+                <button class="btn-action btn-delete"
+                        (click)="onRemoveManager(mgr._id)" title="Retirer">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="hasNoManagers()" class="empty-state-row">
+              <td colspan="6" class="empty-state-cell">
+                <div class="empty-state-content">
+                  <p class="empty-state-text">Aucun manager assigné</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════ MODAL AJOUT COLLABORATEURS ═══════ -->
+<div *ngIf="showAddCollaboratorsModal" class="add-modal-overlay"
+     (click)="onAddCollaboratorsModalClose()">
+  <div class="add-modal-content" (click)="$event.stopPropagation()">
+    <div class="add-modal-header">
+      <h3 class="add-modal-title">Ajouter des collaborateurs à {{ getHrbpFullName() }}</h3>
+      <button class="close-btn" (click)="onAddCollaboratorsModalClose()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="select-all-section">
+      <label class="checkbox-label">
+        <input type="checkbox"
+               [checked]="isAllCollaboratorsSelected()"
+               [indeterminate]="isSomeCollaboratorsSelected()"
+               (change)="selectAllCollaborators($event)">
+        <span>Tout sélectionner ({{ unassignedCollaborators.length }} disponibles)</span>
+      </label>
+    </div>
+
+    <div class="collaborators-list">
+      <div *ngIf="unassignedCollaborators.length === 0" class="no-available">
+        <p>Tous les collaborateurs sont déjà assignés</p>
+      </div>
+      <div *ngFor="let collab of unassignedCollaborators" class="collab-item">
+        <label class="checkbox-label">
+          <input type="checkbox"
+                 [checked]="isCollaboratorSelected(collab._id)"
+                 (change)="onCollaboratorSelected(collab._id, $event)">
+          <div class="collab-info">
+            <div class="collab-name-email">
+              <span class="collab-name">{{ collab.first_name }} {{ collab.last_name }}</span>
+              <span class="collab-email">{{ collab.email }}</span>
+            </div>
+            <span class="collab-grade">{{ collab.grade || '-' }}</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="onAddCollaboratorsModalClose()">Annuler</button>
+      <button class="btn btn-primary" (click)="onConfirmAddCollaborators()"
+              [disabled]="selectedCollaboratorIds.length === 0 || isLoading">
+        <span *ngIf="!isLoading">Ajouter ({{ selectedCollaboratorIds.length }})</span>
+        <span *ngIf="isLoading">Ajout...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL AJOUT MANAGERS ═══════ -->
+<div *ngIf="showAddManagersModal" class="add-modal-overlay"
+     (click)="onAddManagersModalClose()">
+  <div class="add-modal-content" (click)="$event.stopPropagation()">
+    <div class="add-modal-header">
+      <h3 class="add-modal-title">Ajouter des managers à {{ getHrbpFullName() }}</h3>
+      <button class="close-btn" (click)="onAddManagersModalClose()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="select-all-section">
+      <label class="checkbox-label">
+        <input type="checkbox"
+               [checked]="isAllManagersSelected()"
+               [indeterminate]="isSomeManagersSelected()"
+               (change)="selectAllManagers($event)">
+        <span>Tout sélectionner ({{ unassignedManagers.length }} disponibles)</span>
+      </label>
+    </div>
+
+    <div class="collaborators-list">
+      <div *ngIf="unassignedManagers.length === 0" class="no-available">
+        <p>Tous les managers sont déjà assignés à un HRBP</p>
+      </div>
+      <div *ngFor="let mgr of unassignedManagers" class="collab-item">
+        <label class="checkbox-label">
+          <input type="checkbox"
+                 [checked]="isManagerSelected(mgr._id)"
+                 (change)="onManagerSelected(mgr._id, $event)">
+          <div class="collab-info">
+            <div class="collab-name-email">
+              <span class="collab-name">{{ mgr.first_name }} {{ mgr.last_name }}</span>
+              <span class="collab-email">{{ mgr.email }}</span>
+            </div>
+            <span class="collab-grade">{{ mgr.grade || '-' }}</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="onAddManagersModalClose()">Annuler</button>
+      <button class="btn btn-primary" (click)="onConfirmAddManagers()"
+              [disabled]="selectedManagerIds.length === 0 || isLoading">
+        <span *ngIf="!isLoading">Ajouter ({{ selectedManagerIds.length }})</span>
+        <span *ngIf="isLoading">Ajout...</span>
+      </button>
+    </div>
+  </div>
+</div>

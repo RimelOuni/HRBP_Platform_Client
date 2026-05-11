@@ -1,0 +1,117 @@
+<!-- points-calendar.html -->
+<div class="teams-shell">
+
+  <!-- ══════════════════════════════════════
+       LEFT SIDEBAR
+  ══════════════════════════════════════ -->
+  <aside class="sidebar">
+
+    <!-- New event button -->
+    <button class="new-event-btn" routerLink="/hrbp/points/create">
+      <span class="plus-icon">+</span>
+      Nouveau point
+    </button>
+
+    <!-- Mini calendar -->
+    <div class="mini-cal">
+      <div class="mini-cal-header">
+        <button class="mini-nav" (click)="prevMiniMonth()">&#8249;</button>
+        <span class="mini-month-label">
+          {{ monthNames[miniCalendarMonth] }} {{ miniCalendarYear }}
+        </span>
+        <button class="mini-nav" (click)="nextMiniMonth()">&#8250;</button>
+      </div>
+
+      <div class="mini-cal-grid">
+        <div class="mini-day-name" *ngFor="let d of dayNames">{{ d }}</div>
+        <div
+          *ngFor="let day of miniCalendarDays"
+          class="mini-day"
+          [class.other-month]="!day.inMonth"
+          [class.today]="day.isToday"
+          [class.has-event]="day.hasEvent && day.inMonth"
+          (click)="miniDayClick(day)">
+          {{ day.date.getDate() }}
+          <span *ngIf="day.hasEvent && day.inMonth" class="event-dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="sidebar-legend">
+      <p class="legend-title">Statuts</p>
+      <div class="legend-item" *ngFor="let s of statusList">
+        <span class="legend-dot" [style.background]="s.color"></span>
+        {{ s.label }}
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ══════════════════════════════════════
+       MAIN AREA
+  ══════════════════════════════════════ -->
+  <main class="cal-main">
+
+    <!-- Top toolbar (Teams-style) -->
+    <div class="cal-toolbar">
+      <div class="toolbar-left">
+        <button class="toolbar-today-btn" (click)="goToToday()">Aujourd'hui</button>
+        <div class="toolbar-nav">
+          <button class="nav-btn" (click)="goPrev()">&#8249;</button>
+          <button class="nav-btn" (click)="goNext()">&#8250;</button>
+        </div>
+        <h2 class="toolbar-title">{{ currentTitle }}</h2>
+      </div>
+
+      <div class="toolbar-right">
+        <!-- View switcher -->
+        <div class="view-switcher">
+          <button
+            class="view-btn"
+            [class.active]="currentView === 'dayGridMonth'"
+            (click)="switchView('dayGridMonth')">
+            Mois
+          </button>
+          <button
+            class="view-btn"
+            [class.active]="currentView === 'timeGridWeek'"
+            (click)="switchView('timeGridWeek')">
+            Semaine
+          </button>
+          <button
+            class="view-btn"
+            [class.active]="currentView === 'timeGridDay'"
+            (click)="switchView('timeGridDay')">
+            Jour
+          </button>
+          <button
+            class="view-btn"
+            [class.active]="currentView === 'listWeek'"
+            (click)="switchView('listWeek')">
+            Liste
+          </button>
+        </div>
+
+        <button class="list-view-btn" routerLink="/hrbp/points">
+          ☰ Vue liste
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <span>Chargement...</span>
+    </div>
+
+    <!-- FullCalendar -->
+    <div *ngIf="!isLoading" class="fc-wrapper">
+      <full-calendar
+        [options]="calendarOptions"
+        #calComp>
+      </full-calendar>
+    </div>
+
+  </main>
+</div>

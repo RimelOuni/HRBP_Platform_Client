@@ -1,0 +1,240 @@
+<!-- my-surveys.html -->
+
+<div class="ms-page">
+
+  <!-- ── Loading ── -->
+  <div class="ms-state" *ngIf="loading">
+    <div class="ms-spinner"></div>
+    <p>Loading surveys…</p>
+  </div>
+
+  <!-- ── Error ── -->
+  <div class="ms-state ms-state--error" *ngIf="error && !loading">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M20 13v8M20 25h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       SURVEY LIST
+  ════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="!loading && !error && !selectedSurvey">
+
+    <div class="ms-header">
+      <div>
+        <h1 class="ms-title">My Surveys</h1>
+        <p class="ms-subtitle">Complete surveys to earn points and unlock badges</p>
+      </div>
+      <span class="ms-count-badge" *ngIf="surveys.length > 0">
+        {{ surveys.length }} pending
+      </span>
+    </div>
+
+    <!-- Empty -->
+    <div class="ms-state" *ngIf="surveys.length === 0">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <rect x="8" y="6" width="32" height="36" rx="4" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M15 16h18M15 22h12M15 28h8"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="36" cy="36" r="7" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+        <path d="M33.5 36l1.5 1.5 3-3"
+              stroke="#16a34a" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p class="ms-empty-title">All caught up!</p>
+      <p class="ms-empty-sub">No surveys available right now. Check back later.</p>
+    </div>
+
+    <!-- Cards -->
+    <div class="ms-grid" *ngIf="surveys.length > 0">
+      <div class="ms-card" *ngFor="let s of surveys" (click)="openSurvey(s)">
+
+        <div class="ms-card-icon ms-card-icon--google">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M4 3h8l4 4v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"
+                  stroke="currentColor" stroke-width="1.4"/>
+            <path d="M12 3v5h5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="ms-card-body">
+          <div class="ms-card-type">{{ s.type }}</div>
+          <div class="ms-card-title">{{ getSurveyLabel(s) }}</div>
+          <div class="ms-card-meta">
+            <span class="ms-gf-chip">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+              Google Forms
+            </span>
+            <span class="ms-meta-sep">·</span>
+            <span>{{ getPracticeName(s) }}</span>
+          </div>
+        </div>
+
+        <div class="ms-card-right">
+          <div class="ms-pts-chip">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+              <path d="M6 1l1.3 3.9H11L8.2 6.8l1 3.9L6 8.4l-3.2 2.3 1-3.9L1 4.9h3.7z"
+                    fill="currentColor"/>
+            </svg>
+            {{ s.pointsReward }} pts
+          </div>
+          <div class="ms-arrow">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+              <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+      </div><!-- /ms-card -->
+    </div><!-- /ms-grid -->
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════════════════
+       GOOGLE FORM VIEW
+  ════════════════════════════════════════════════════════════ -->
+  <div class="ms-gf-view" *ngIf="selectedSurvey">
+
+    <button class="ms-back-btn ms-back-btn--top" (click)="closeSurvey()">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+        <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Back to surveys
+    </button>
+
+    <div class="ms-gf-card">
+      <div class="ms-gf-accent"></div>
+
+      <div class="ms-gf-header">
+        <div class="ms-gf-icon">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="3" y="3" width="16" height="16" rx="3"
+                  stroke="currentColor" stroke-width="1.4"/>
+            <path d="M7 8h8M7 11h5M7 14h3"
+                  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <span class="ms-gf-badge">Google Forms</span>
+          <h2 class="ms-gf-title">{{ getSurveyLabel(selectedSurvey) }}</h2>
+          <p class="ms-gf-pts">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M6 1l1.3 3.9H11L8.2 6.8l1 3.9L6 8.4l-3.2 2.3 1-3.9L1 4.9h3.7z"
+                    fill="currentColor"/>
+            </svg>
+            {{ selectedSurvey.pointsReward }} points to earn
+          </p>
+        </div>
+      </div>
+
+      <div class="ms-gf-iframe-wrap">
+        <iframe [src]="getEmbedUrl(getGoogleFormUrl(selectedSurvey))"
+                frameborder="0" class="ms-gf-iframe">
+        </iframe>
+      </div>
+
+      <div class="ms-gf-footer">
+        <p class="ms-gf-notice">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M7 5v3M7 9.5h.01" stroke="currentColor" stroke-width="1.2"
+                  stroke-linecap="round"/>
+          </svg>
+          After submitting the Google Form above, click the button below to validate
+          your participation and earn your points.
+        </p>
+        <button class="ms-btn-primary"
+                [disabled]="isSubmitting"
+                (click)="validateGoogleForm()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7l4 4 6-7" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          {{ isSubmitting ? 'Validating…' : 'Validate my participation' }}
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /ms-gf-view -->
+
+</div><!-- /ms-page -->
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SUCCESS MODAL
+════════════════════════════════════════════════════════════════ -->
+<div class="ms-backdrop" [class.open]="showSuccessModal">
+  <div class="ms-modal">
+    <div class="ms-modal-icon ms-modal-icon--success">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <path d="M5 14l6 6L23 8" stroke="white" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h3 class="ms-modal-title">Response Recorded!</h3>
+    <p class="ms-modal-sub">
+      Thank you for your participation. Your response has been saved.
+    </p>
+    <div class="ms-modal-pts">
+      +{{ lastResult?.pointsEarned }} pts earned
+      &nbsp;·&nbsp;
+      Total: {{ lastResult?.totalPoints }} pts
+    </div>
+    <button class="ms-btn-primary ms-btn-full" (click)="onSuccessOk()">Done</button>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     BADGE MODAL
+════════════════════════════════════════════════════════════════ -->
+<div class="ms-backdrop" [class.open]="showBadgeModal" (click)="nextBadge()">
+  <div class="ms-modal ms-modal--badge" (click)="$event.stopPropagation()">
+
+    <div class="ms-confetti" aria-hidden="true">
+      <span *ngFor="let n of [1,2,3,4,5,6,7,8,9,10,11,12]"
+            class="ms-confetti-dot" [attr.data-i]="n"></span>
+    </div>
+
+    <div class="ms-badge-wrap">
+      <div class="ms-badge-glow" [style.background]="currentBadge?.color"></div>
+      <div class="ms-badge-circle" [style.background]="badgeGradient">
+        <span class="ms-badge-emoji">{{ currentBadge?.icon }}</span>
+      </div>
+    </div>
+
+    <p class="ms-modal-congrats">Congratulations!</p>
+    <h3 class="ms-modal-title">{{ currentBadge?.name }} unlocked</h3>
+    <p class="ms-modal-sub">{{ currentBadge?.description }}</p>
+
+    <div class="ms-modal-pts">+{{ lastResult?.pointsEarned }} bonus pts</div>
+
+    <p class="ms-next-badge-hint" *ngIf="lastResult?.nextBadge && isLastBadge">
+      Next: <strong>
+        {{ lastResult!.nextBadge!.icon }} {{ lastResult!.nextBadge!.name }}
+      </strong>
+      — {{ lastResult!.nextBadge!.surveysRemaining }}
+      survey{{ lastResult!.nextBadge!.surveysRemaining !== 1 ? 's' : '' }} left
+    </p>
+
+    <div class="ms-badge-dots" *ngIf="badgeQueue.length > 1">
+      <span *ngFor="let b of badgeQueue; let i = index"
+            class="ms-badge-dot" [class.active]="i === currentBadgeIdx">
+      </span>
+    </div>
+
+    <button class="ms-btn-primary ms-btn-full" (click)="nextBadge()">
+      {{ isLastBadge ? 'Continue' : 'Next Badge →' }}
+    </button>
+  </div>
+</div>

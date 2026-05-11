@@ -1,0 +1,107 @@
+<div class="mb-wrap">
+
+  <!-- Header -->
+  <div class="mb-header">
+    <div class="mb-header-left">
+      <h2 class="mb-title">My Badges</h2>
+      <p class="mb-sub">Your rewards for your engagement in surveys</p>
+    </div>
+    <div class="mb-pts-chip" *ngIf="gamification">
+      🏆 {{ gamification.points }} pts &nbsp;·&nbsp;
+      {{ gamification.surveysAnswered }} survey{{ gamification.surveysAnswered !== 1 ? 's' : '' }}
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="mb-state">
+    <span class="mb-spinner"></span> Loading...
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="mb-state mb-state--error">⚠️ {{ error }}</div>
+
+  <ng-container *ngIf="!loading && !error">
+
+    <!-- Progress vers le prochain badge -->
+    <div class="mb-next-card" *ngIf="gamification?.nextBadge">
+      <div class="mb-next-left">
+        <div class="mb-next-icon">{{ gamification!.nextBadge!.icon }}</div>
+        <div>
+          <div class="mb-next-name">Next: {{ gamification!.nextBadge!.name }}</div>
+          <div class="mb-next-hint">
+            <strong>{{ gamification!.nextBadge!.surveysRemaining }}</strong>
+            more survey{{ gamification!.nextBadge!.surveysRemaining !== 1 ? 's' : '' }} to complete
+          </div>
+        </div>
+      </div>
+      <div class="mb-progress-wrap">
+        <div class="mb-progress-track">
+          <div class="mb-progress-fill" [style.width.%]="nextBadgeProgress"></div>
+        </div>
+        <div class="mb-progress-label">
+          {{ gamification!.surveysAnswered }} / {{ gamification!.nextBadge!.surveysRequired }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Tous les badges débloqués -->
+    <div class="mb-all-done" *ngIf="!gamification?.nextBadge && earnedBadges.length > 0">
+      👑 You've unlocked all badges. Congratulations!
+    </div>
+
+    <!-- ══ BADGES GAGNÉS ══ -->
+    <h3 class="mb-section-title" *ngIf="earnedBadges.length > 0">
+      Earned Badges <span class="mb-count">{{ earnedBadges.length }}</span>
+    </h3>
+
+    <div class="mb-empty" *ngIf="earnedBadges.length === 0">
+      <div class="mb-empty-icon">🌱</div>
+      <p>No badges earned yet.<br>Answer your first survey to get started!</p>
+    </div>
+
+    <div class="mb-grid" *ngIf="earnedBadges.length > 0">
+      <div *ngFor="let b of earnedBadges" class="mb-badge-card mb-badge-card--earned">
+
+        <div class="mb-badge-glow" [style.background]="b.color"></div>
+
+        <div class="mb-badge-circle" [style.background]="getBadgeGradient(b)">
+          <span class="mb-badge-emoji">{{ b.icon }}</span>
+        </div>
+
+        <div class="mb-badge-name">{{ b.name }}</div>
+        <div class="mb-badge-desc">{{ b.description }}</div>
+
+        <div class="mb-badge-meta">
+          <span class="mb-badge-date">{{ b.earnedAt | date:'dd/MM/yyyy' }}</span>
+          <span class="mb-badge-pts">
+            after {{ b.surveysAnsweredAtEarn }} survey{{ b.surveysAnsweredAtEarn !== 1 ? 's' : '' }}
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ BADGES VERROUILLÉS ══ -->
+    <h3 class="mb-section-title mb-section-title--locked" *ngIf="lockedBadges.length > 0">
+      To Unlock <span class="mb-count mb-count--locked">{{ lockedBadges.length }}</span>
+    </h3>
+
+    <div class="mb-grid mb-grid--locked" *ngIf="lockedBadges.length > 0">
+      <div *ngFor="let b of lockedBadges" class="mb-badge-card mb-badge-card--locked">
+
+        <div class="mb-badge-circle mb-badge-circle--locked">
+          <span class="mb-badge-emoji mb-badge-emoji--locked">{{ b.icon }}</span>
+        </div>
+
+        <div class="mb-badge-name mb-badge-name--locked">{{ b.name }}</div>
+        <div class="mb-badge-desc">{{ b.description }}</div>
+
+        <div class="mb-badge-req">
+          🎯 {{ b.surveysRequired }} survey{{ b.surveysRequired !== 1 ? 's' : '' }} required
+        </div>
+
+      </div>
+    </div>
+
+  </ng-container>
+</div>

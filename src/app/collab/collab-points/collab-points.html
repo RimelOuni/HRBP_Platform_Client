@@ -1,0 +1,762 @@
+<div class="cp-page">
+
+  <!-- ══ HEADER ═══════════════════════════════════════════════ -->
+  <div class="cp-header">
+    <div>
+      <h1 class="cp-title">Mes Points de suivi</h1>
+      <p class="cp-sub">Consultez vos points, demandes et réclamations.</p>
+    </div>
+    <button class="cp-btn-add" (click)="openReq()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Demander un point
+    </button>
+  </div>
+
+  <!-- ══ ONGLETS ═══════════════════════════════════════════════ -->
+  <div class="cp-tabs">
+    <button class="cp-tab" [class.cp-tab-active]="activeTab === 'points'" (click)="switchTab('points')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+        <path d="M7 8h10M7 12h7M7 16h5" stroke-linecap="round"/>
+      </svg>
+      Mes points
+      <span class="cp-tab-badge" *ngIf="points.length > 0">{{ points.length }}</span>
+    </button>
+    <button class="cp-tab" [class.cp-tab-active]="activeTab === 'requests'" (click)="switchTab('requests')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+      Mes demandes
+      <span class="cp-tab-badge cp-tab-badge-blue" *ngIf="requests.length > 0">{{ requests.length }}</span>
+    </button>
+    <button class="cp-tab" [class.cp-tab-active]="activeTab === 'reclamations'" (click)="switchTab('reclamations')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      Mes réclamations
+      <span class="cp-tab-badge cp-tab-badge-amber" *ngIf="reclams.length > 0">{{ reclams.length }}</span>
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       ONGLET 1 — MES POINTS
+  ════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'points'">
+
+    <div class="cp-filter-card">
+      <div class="cp-filter-card-header">
+        <p class="cp-filter-card-title">Recherche &amp; Filtres</p>
+        <p class="cp-filter-card-sub">Retrouvez vos points de suivi</p>
+      </div>
+
+      <div class="cp-filter-grid">
+        <div class="cp-filter-field">
+          <span class="cp-filter-field-label">Rechercher</span>
+          <div class="cp-search-wrap">
+            <span class="cp-search-ico">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </span>
+            <input type="text" class="cp-search-input" [(ngModel)]="searchQuery"
+                   (ngModelChange)="applyFiltersPublic()" placeholder="Rechercher par titre…"/>
+          </div>
+        </div>
+
+        <div class="cp-filter-field">
+          <span class="cp-filter-field-label">Date</span>
+          <div class="cp-date-input-wrap">
+            <span class="cp-date-ico">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </span>
+            <input type="date" class="cp-filter-date" [(ngModel)]="dateFrom" [max]="today" (change)="onDateChange()"/>
+          </div>
+        </div>
+
+        <div class="cp-filter-field">
+          <span class="cp-filter-field-label">Statut</span>
+          <div class="cp-select-wrap">
+            <select class="cp-filter-select" [(ngModel)]="activeFilter"
+                    [class.has-value]="activeFilter !== 'Tous'" (ngModelChange)="applyFiltersPublic()">
+              <option value="Tous">Tous les statuts</option>
+              <option value="En attente">En attente</option>
+              <option value="En cours">En cours</option>
+              <option value="Terminé">Terminé</option>
+              <option value="Annulé">Annulé</option>
+            </select>
+            <span class="cp-select-chevron">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="cp-filter-field">
+          <span class="cp-filter-field-label">Criticité</span>
+          <div class="cp-select-wrap">
+            <select class="cp-filter-select" [(ngModel)]="critFilter"
+                    [class.has-value]="critFilter !== 'Tous'" (ngModelChange)="applyFiltersPublic()">
+              <option value="Tous">Toutes les criticités</option>
+              <option value="Basse">Basse</option>
+              <option value="Moyenne">Moyenne</option>
+              <option value="Haute">Haute</option>
+            </select>
+            <span class="cp-select-chevron">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="cp-filter-field">
+          <span class="cp-filter-field-label">Fréquence</span>
+          <div class="cp-select-wrap">
+            <select class="cp-filter-select" [(ngModel)]="freqFilter"
+                    [class.has-value]="freqFilter !== 'Tous'" (ngModelChange)="applyFiltersPublic()">
+              <option value="Tous">Toutes les fréquences</option>
+              <option value="Ponctuel">Ponctuel</option>
+              <option value="Hebdomadaire">Hebdomadaire</option>
+              <option value="Bimensuel">Bimensuel</option>
+              <option value="Chaque mois">Chaque mois</option>
+              <option value="Trimestriel">Trimestriel</option>
+            </select>
+            <span class="cp-select-chevron">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cp-filter-footer">
+        <div class="cp-filter-tags">
+          <span class="cp-filter-tag" *ngIf="activeFilter !== 'Tous'">
+            {{ activeFilter }}
+            <button class="cp-filter-tag-remove" (click)="activeFilter='Tous'; applyFiltersPublic()">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </span>
+          <span class="cp-filter-tag" *ngIf="critFilter !== 'Tous'">
+            Criticité : {{ critFilter }}
+            <button class="cp-filter-tag-remove" (click)="critFilter='Tous'; applyFiltersPublic()">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </span>
+          <span class="cp-filter-tag" *ngIf="freqFilter !== 'Tous'">
+            Fréquence : {{ freqFilter }}
+            <button class="cp-filter-tag-remove" (click)="freqFilter='Tous'; applyFiltersPublic()">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </span>
+          <span class="cp-filter-tag" *ngIf="dateFrom">
+            À partir du {{ fmtDate(dateFrom) }}
+            <button class="cp-filter-tag-remove" (click)="dateFrom=''; applyFiltersPublic()">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </span>
+          <span class="cp-filter-tag" *ngIf="searchQuery">
+            « {{ searchQuery }} »
+            <button class="cp-filter-tag-remove" (click)="searchQuery=''; applyFiltersPublic()">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </span>
+        </div>
+        <div class="cp-filter-footer-actions">
+          <button class="cp-sort-btn" (click)="toggleSort()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M7 12h10M11 18h2"/>
+            </svg>
+            {{ sortOrder === 'desc' ? 'Plus récent' : 'Plus ancien' }}
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                 [style.transform]="sortOrder === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)'"
+                 style="transition:transform .2s">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <button class="cp-reset-btn" *ngIf="hasActiveFilters" (click)="resetFilters()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cp-results-info" *ngIf="!loading && !error">
+      <span>
+        <strong>{{ filtered.length }}</strong> point{{ filtered.length > 1 ? 's' : '' }}
+        <ng-container *ngIf="hasActiveFilters"> · filtre(s) actif(s)</ng-container>
+      </span>
+      <span class="cp-pending-notice" *ngIf="activeFilter === 'Tous' && count('En attente') > 0">
+        <span class="cp-dot-pending"></span>
+        {{ count('En attente') }} en attente 
+      </span>
+    </div>
+
+    <div class="cp-state" *ngIf="loading"><span class="cp-spin"></span><p>Chargement…</p></div>
+
+    <div class="cp-state cp-state-err" *ngIf="error && !loading">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/>
+      </svg>
+      <p>{{ error }}</p>
+      <button class="cp-btn-ghost" (click)="load()">Réessayer</button>
+    </div>
+
+    <div class="cp-state" *ngIf="!loading && !error && filtered.length === 0">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+        <path d="M9 9h6M9 12h4" stroke-linecap="round"/>
+      </svg>
+      <p class="cp-empty-t">
+        {{ activeFilter === 'Tous' && !searchQuery && critFilter === 'Tous' && freqFilter === 'Tous' ? 'Aucun point de suivi' : 'Aucun résultat' }}
+      </p>
+      <p class="cp-empty-s" *ngIf="activeFilter === 'Tous' && !hasActiveFilters">
+        Votre HRBP n'a pas encore créé de points pour vous.
+      </p>
+      <button class="cp-btn-ghost" *ngIf="hasActiveFilters" (click)="resetFilters()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Réinitialiser les filtres
+      </button>
+    </div>
+
+    <div class="cp-list" *ngIf="!loading && !error && filtered.length > 0">
+      <div class="cp-card" *ngFor="let p of filtered"
+           [class.cp-card-done]="p.status === 'Terminé'"
+           [class.cp-card-cancelled]="p.status === 'Annulé'"
+           [class.cp-card-pending]="p.status === 'En attente'"
+           [class.cp-card-progress]="p.status === 'En cours'">
+
+        <div class="cp-card-top">
+          <div class="cp-card-left">
+            <div class="cp-card-ico"
+                 [class.cp-card-ico-done]="p.status === 'Terminé'"
+                 [class.cp-card-ico-pending]="p.status === 'En attente'"
+                 [class.cp-card-ico-progress]="p.status === 'En cours'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                <path d="M7 8h10M7 12h7M7 16h5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="cp-card-title">{{ p.titre }}</h3>
+              <span class="cp-card-freq" *ngIf="getFrequence(p)">{{ getFrequence(p) }}</span>
+            </div>
+          </div>
+          <span class="cp-s" [ngClass]="statusCls(p.status)">{{ p.status || 'En attente' }}</span>
+        </div>
+
+        <p class="cp-card-desc" *ngIf="p.description">{{ p.description }}</p>
+
+        <div class="cp-meta">
+          <span class="cp-meta-i">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            {{ fmtDate(p.date) }}
+          </span>
+          <span class="cp-meta-i" *ngIf="p.criticite" [ngClass]="critCls(p.criticite)">● {{ p.criticite }}</span>
+          <span class="cp-meta-i" *ngIf="p.practice_id?.name">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            {{ p.practice_id?.name }}
+          </span>
+          <span class="cp-meta-i cp-meta-hrbp">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/>
+            </svg>
+            Par {{ hrbpName(p) }}
+          </span>
+        </div>
+
+        <div class="cp-card-foot">
+          <ng-container *ngIf="p.status !== 'Terminé' && p.status !== 'Annulé'">
+            <button class="cp-btn-reclam" *ngIf="!hasPendingReclam(p)" (click)="openRec(p)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              Réclamer
+            </button>
+            <span class="cp-pending-reclam" *ngIf="hasPendingReclam(p)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/>
+              </svg>
+              Réclamation en attente
+            </span>
+          </ng-container>
+          <ng-container *ngIf="p.status === 'Terminé'">
+            <button class="cp-btn-sat" *ngIf="!hasPointSat(p)" (click)="openSat(p)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              Évaluer ce point
+            </button>
+            <span class="cp-sat-done" *ngIf="hasPointSat(p)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              Satisfaction : {{ getPointSatValue(p) }}/5
+            </span>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════════════════
+       ONGLET 2 — MES DEMANDES
+  ════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'requests'">
+    <div class="cp-state" *ngIf="loadingRequests"><span class="cp-spin"></span><p>Chargement…</p></div>
+
+    <div class="cp-state" *ngIf="!loadingRequests && requests.length === 0">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+      <p class="cp-empty-t">Aucune demande envoyée</p>
+      <p class="cp-empty-s">Cliquez sur «&nbsp;Demander un point&nbsp;» pour contacter votre HRBP.</p>
+    </div>
+
+    <ng-container *ngIf="!loadingRequests && requests.length > 0">
+
+      <!-- ── EN ATTENTE ── -->
+      <div class="cp-msg-list" *ngIf="pendingRequests.length > 0">
+        <ng-container *ngFor="let r of pendingRequests">
+          <ng-container *ngTemplateOutlet="reqCard; context: { $implicit: r }"></ng-container>
+        </ng-container>
+      </div>
+
+      <!-- ── SÉPARATEUR TRAITÉES ── -->
+      <div class="cp-group-divider" *ngIf="processedRequests.length > 0">
+        <span class="cp-group-divider-label cp-group-divider-done">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+          Traitées ({{ processedRequests.length }})
+        </span>
+      </div>
+
+      <div class="cp-msg-list cp-list-faded" *ngIf="processedRequests.length > 0">
+        <ng-container *ngFor="let r of processedRequests">
+          <ng-container *ngTemplateOutlet="reqCard; context: { $implicit: r }"></ng-container>
+        </ng-container>
+      </div>
+
+      <!-- ── SÉPARATEUR REFUSÉES ── -->
+      <div class="cp-group-divider" *ngIf="rejectedRequests.length > 0">
+        <span class="cp-group-divider-label cp-group-divider-rejected">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          Refusées ({{ rejectedRequests.length }})
+        </span>
+      </div>
+
+      <div class="cp-msg-list cp-list-faded cp-list-rejected" *ngIf="rejectedRequests.length > 0">
+        <ng-container *ngFor="let r of rejectedRequests">
+          <ng-container *ngTemplateOutlet="reqCard; context: { $implicit: r }"></ng-container>
+        </ng-container>
+      </div>
+
+    </ng-container>
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════════════════
+       ONGLET 3 — MES RÉCLAMATIONS
+  ════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'reclamations'">
+    <div class="cp-state" *ngIf="loadingReclams"><span class="cp-spin"></span><p>Chargement…</p></div>
+
+    <div class="cp-state" *ngIf="!loadingReclams && reclams.length === 0">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <p class="cp-empty-t">Aucune réclamation envoyée</p>
+      <p class="cp-empty-s">Vous pouvez réclamer sur un point actif depuis l'onglet «&nbsp;Mes points&nbsp;».</p>
+    </div>
+
+    <ng-container *ngIf="!loadingReclams && reclams.length > 0">
+
+      <!-- ── EN ATTENTE ── -->
+      <div class="cp-msg-list" *ngIf="pendingReclams.length > 0">
+        <ng-container *ngFor="let r of pendingReclams">
+          <ng-container *ngTemplateOutlet="recCard; context: { $implicit: r }"></ng-container>
+        </ng-container>
+      </div>
+
+      <!-- ── SÉPARATEUR TRAITÉES ── -->
+      <div class="cp-group-divider" *ngIf="processedReclams.length > 0">
+        <span class="cp-group-divider-label cp-group-divider-done">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+          Traitées ({{ processedReclams.length }})
+        </span>
+      </div>
+
+      <div class="cp-msg-list cp-list-faded" *ngIf="processedReclams.length > 0">
+        <ng-container *ngFor="let r of processedReclams">
+          <ng-container *ngTemplateOutlet="recCard; context: { $implicit: r }"></ng-container>
+        </ng-container>
+      </div>
+
+      <!-- ── SÉPARATEUR REFUSÉES ── -->
+      <div class="cp-group-divider" *ngIf="rejectedReclams.length > 0">
+        <span class="cp-group-divider-label cp-group-divider-rejected">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          Refusées ({{ rejectedReclams.length }})
+        </span>
+      </div>
+
+      <div class="cp-msg-list cp-list-faded cp-list-rejected" *ngIf="rejectedReclams.length > 0">
+        <ng-container *ngFor="let r of rejectedReclams">
+          <ng-container *ngTemplateOutlet="recCard; context: { $implicit: r }"></ng-container>
+        </ng-container>
+      </div>
+
+    </ng-container>
+  </ng-container>
+
+</div><!-- /cp-page -->
+
+<!-- ════ TEMPLATE CARTE DEMANDE ════ -->
+<ng-template #reqCard let-r>
+  <div class="cp-msg-card"
+       [class.cp-msg-card-pending]="r.status === 'PENDING'"
+       [class.cp-msg-card-done]="r.status === 'PROCESSED'"
+       [class.cp-msg-card-rejected]="r.status === 'REJECTED'">
+    <div class="cp-msg-head">
+      <div class="cp-msg-ico cp-msg-ico-blue">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </div>
+      <div class="cp-msg-info">
+        <h3 class="cp-msg-title">{{ r.titre }}</h3>
+        <div class="cp-msg-meta">
+          <span class="cp-meta-i">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Date souhaitée : <strong>{{ fmtDate(r.date_souhaitee) }}</strong>
+          </span>
+          <span class="cp-meta-i" style="color:#9ca3af">Envoyée le {{ fmtDate(r.createdAt) }}</span>
+        </div>
+      </div>
+      <span class="cp-b" [ngClass]="msgCls(r.status)">{{ msgLbl(r.status) }}</span>
+    </div>
+    <p class="cp-msg-body" *ngIf="r.commentaire">{{ r.commentaire }}</p>
+    <div class="cp-msg-status-detail">
+      <div class="cp-status-info cp-status-info-pending" *ngIf="r.status === 'PENDING'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+        <span>En attente de traitement par votre HRBP.</span>
+      </div>
+      <div class="cp-status-info cp-status-info-done" *ngIf="r.status === 'PROCESSED'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+        </svg>
+        <span>Votre HRBP a traité cette demande et a pu créer un point de suivi.</span>
+      </div>
+      <div class="cp-status-info cp-status-info-rejected" *ngIf="r.status === 'REJECTED'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <span>Votre HRBP a refusé cette demande.</span>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ════ TEMPLATE CARTE RÉCLAMATION ════ -->
+<ng-template #recCard let-r>
+  <div class="cp-msg-card cp-msg-card-amber"
+       [class.cp-msg-card-pending]="r.status === 'PENDING'"
+       [class.cp-msg-card-done]="r.status === 'PROCESSED'"
+       [class.cp-msg-card-rejected]="r.status === 'REJECTED'">
+    <div class="cp-msg-head">
+      <div class="cp-msg-ico cp-msg-ico-amber">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div class="cp-msg-info">
+        <h3 class="cp-msg-title">{{ r.titre }}</h3>
+        <div class="cp-msg-meta">
+          <span class="cp-meta-i" *ngIf="r.point_id">Point : <strong>{{ r.point_id.titre }}</strong></span>
+          <span class="cp-meta-i cp-meta-amber" *ngIf="r.nouvelle_date_proposee">Nouvelle date : {{ fmtDate(r.nouvelle_date_proposee) }}</span>
+          <span class="cp-meta-i" style="color:#9ca3af">Envoyée le {{ fmtDate(r.createdAt) }}</span>
+        </div>
+      </div>
+      <span class="cp-b" [ngClass]="msgCls(r.status)">{{ msgLbl(r.status) }}</span>
+    </div>
+    <p class="cp-msg-body" *ngIf="r.commentaire">{{ r.commentaire }}</p>
+    <div class="cp-snapshot" *ngIf="r.point_snapshot?.titre">
+      <p class="cp-snapshot-lbl">État du point au moment de la réclamation</p>
+      <div class="cp-snapshot-grid">
+        <span class="cp-snapshot-k">Date</span>
+        <span class="cp-snapshot-v">{{ fmtDate(r.point_snapshot?.date) }}</span>
+        <span class="cp-snapshot-k">Statut</span>
+        <span class="cp-snapshot-v">
+          <span class="cp-s cp-s-sm" [ngClass]="statusCls(r.point_snapshot?.status)">{{ r.point_snapshot?.status }}</span>
+        </span>
+        <ng-container *ngIf="r.point_snapshot?.criticite">
+          <span class="cp-snapshot-k">Criticité</span>
+          <span class="cp-snapshot-v" [ngClass]="critCls(r.point_snapshot?.criticite)">● {{ r.point_snapshot?.criticite }}</span>
+        </ng-container>
+      </div>
+    </div>
+    <div class="cp-msg-status-detail">
+      <div class="cp-status-info cp-status-info-pending" *ngIf="r.status === 'PENDING'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+        <span>En attente de traitement par votre HRBP.</span>
+      </div>
+      <div class="cp-status-info cp-status-info-done" *ngIf="r.status === 'PROCESSED'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+        </svg>
+        <span>Votre HRBP a traité cette réclamation.</span>
+      </div>
+      <div class="cp-status-info cp-status-info-rejected" *ngIf="r.status === 'REJECTED'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <span>Votre HRBP a refusé cette réclamation.</span>
+      </div>
+    </div>
+    <div class="cp-hrbp-reply" *ngIf="r.reponse_hrbp">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span><strong>Réponse HRBP :</strong> {{ r.reponse_hrbp }}</span>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ══ MODAL DEMANDE ══════════════════════════════════════════ -->
+<div *ngIf="showReqModal" class="cp-overlay" (click)="closeReq()">
+  <div class="cp-modal" (click)="$event.stopPropagation()">
+    <div class="cp-modal-head">
+      <div class="cp-modal-head-l">
+        <div class="cp-modal-ico cp-modal-ico-green">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </div>
+        <div>
+          <p class="cp-modal-title">Demander un point de suivi</p>
+          <p class="cp-modal-sub">Votre HRBP recevra la demande et créera le point.</p>
+        </div>
+      </div>
+      <button class="cp-modal-close" (click)="closeReq()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="cp-modal-ok" *ngIf="reqOk">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+      </svg>
+      <p>Demande envoyée !</p>
+    </div>
+    <div class="cp-modal-body" *ngIf="!reqOk">
+      <div class="cp-field">
+        <label class="cp-lbl">Titre *</label>
+        <input class="cp-inp" [(ngModel)]="reqForm.titre" placeholder="Ex : Point mensuel, revue de projet…"/>
+      </div>
+      <div class="cp-field">
+        <label class="cp-lbl">Date souhaitée *</label>
+        <input class="cp-inp cp-inp-date" type="date" [min]="today" [(ngModel)]="reqForm.date_souhaitee"/>
+      </div>
+      <div class="cp-field">
+        <label class="cp-lbl">Commentaire <span class="cp-opt">(optionnel)</span></label>
+        <textarea class="cp-ta" rows="3" [(ngModel)]="reqForm.commentaire" placeholder="Précisez l'objet de votre demande…"></textarea>
+      </div>
+    </div>
+    <div class="cp-modal-foot" *ngIf="!reqOk">
+      <button class="cp-btn-cancel" (click)="closeReq()">Annuler</button>
+      <button class="cp-btn-green" [disabled]="!reqForm.titre.trim() || !reqForm.date_souhaitee || savingReq" (click)="submitReq()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+        {{ savingReq ? 'Envoi…' : 'Envoyer' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL RÉCLAMATION ══════════════════════════════════════ -->
+<div *ngIf="showRecModal" class="cp-overlay" (click)="closeRec()">
+  <div class="cp-modal cp-modal-wide" (click)="$event.stopPropagation()">
+    <div class="cp-modal-head">
+      <div class="cp-modal-head-l">
+        <div class="cp-modal-ico cp-modal-ico-amber">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div>
+          <p class="cp-modal-title">Réclamation</p>
+          <p class="cp-modal-sub">Signalez un problème à votre HRBP concernant ce point.</p>
+        </div>
+      </div>
+      <button class="cp-modal-close" (click)="closeRec()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="cp-modal-ok" *ngIf="recOk">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+      </svg>
+      <p>Réclamation envoyée !</p>
+    </div>
+    <div class="cp-modal-body" *ngIf="!recOk">
+      <div class="cp-point-ctx" *ngIf="recPoint">
+        <p class="cp-ctx-lbl">Point concerné</p>
+        <div class="cp-ctx-card">
+          <div class="cp-ctx-row">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 8h10M7 12h7" stroke-linecap="round"/>
+            </svg>
+            <strong>{{ recPoint.titre }}</strong>
+          </div>
+          <div class="cp-ctx-row">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Date actuelle : <strong>{{ fmtDate(recPoint.date) }}</strong>
+          </div>
+          <div class="cp-ctx-row" *ngIf="recPoint.criticite">
+            <span class="cp-crit" [ngClass]="critCls(recPoint.criticite)">● {{ recPoint.criticite }}</span>
+          </div>
+          <div class="cp-ctx-row">
+            <span class="cp-s cp-s-sm" [ngClass]="statusCls(recPoint.status)">{{ recPoint.status }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="cp-field">
+        <label class="cp-lbl">Objet de la réclamation *</label>
+        <input class="cp-inp" [(ngModel)]="recForm.titre" placeholder="Ex : Reporter la date, point non traité…"/>
+      </div>
+      <div class="cp-field">
+        <label class="cp-lbl">Nouvelle date proposée <span class="cp-opt">(optionnel)</span></label>
+        <input class="cp-inp cp-inp-date" type="date" [min]="today" [(ngModel)]="recForm.nouvelle_date_proposee"/>
+      </div>
+      <div class="cp-field">
+        <label class="cp-lbl">Commentaire <span class="cp-opt">(optionnel)</span></label>
+        <textarea class="cp-ta" rows="3" [(ngModel)]="recForm.commentaire" placeholder="Expliquez la raison de votre réclamation…"></textarea>
+      </div>
+    </div>
+    <div class="cp-modal-foot" *ngIf="!recOk">
+      <button class="cp-btn-cancel" (click)="closeRec()">Annuler</button>
+      <button class="cp-btn-amber" [disabled]="!recForm.titre.trim() || savingRec" (click)="submitRec()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+        {{ savingRec ? 'Envoi…' : 'Envoyer la réclamation' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL SATISFACTION ════════════════════════════════════ -->
+<div *ngIf="showSatModal" class="cp-overlay" (click)="closeSat()">
+  <div class="cp-modal" (click)="$event.stopPropagation()">
+    <div class="cp-modal-head">
+      <div class="cp-modal-head-l">
+        <div class="cp-modal-ico cp-modal-ico-star">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <div>
+          <p class="cp-modal-title">Évaluer ce point</p>
+          <p class="cp-modal-sub" *ngIf="satPoint">« {{ satPoint.titre }} »</p>
+        </div>
+      </div>
+      <button class="cp-modal-close" (click)="closeSat()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="cp-modal-ok" *ngIf="satOk">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+      </svg>
+      <p>Satisfaction enregistrée !</p>
+    </div>
+    <div class="cp-modal-body" *ngIf="!satOk">
+      <p class="cp-sat-question">Comment s'est déroulé ce point avec votre HRBP ?</p>
+      <div class="cp-sat-stars">
+        <button *ngFor="let s of [1,2,3,4,5]" class="cp-star-btn"
+                [class.cp-star-active]="s <= satForm.value" (click)="satForm.value = s">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </button>
+      </div>
+      <p class="cp-sat-label" *ngIf="satForm.value > 0">{{ satLabel(satForm.value) }}</p>
+      <div class="cp-field">
+        <label class="cp-lbl">Commentaire <span class="cp-opt">(optionnel)</span></label>
+        <textarea class="cp-ta" rows="3" [(ngModel)]="satForm.comment" placeholder="Partagez votre ressenti sur ce point…"></textarea>
+      </div>
+    </div>
+    <div class="cp-modal-foot" *ngIf="!satOk">
+      <button class="cp-btn-cancel" (click)="closeSat()">Annuler</button>
+      <button class="cp-btn-star" [disabled]="!satForm.value || savingSat" (click)="submitSat()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        {{ savingSat ? 'Envoi…' : 'Valider ma satisfaction' }}
+      </button>
+    </div>
+  </div>
+</div>

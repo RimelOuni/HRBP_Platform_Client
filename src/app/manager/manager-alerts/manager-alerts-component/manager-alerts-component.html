@@ -1,0 +1,228 @@
+<!-- src/app/features/manager/manager-alerts/manager-alerts.component.html -->
+<div class="manager-alerts-container">
+
+  <!-- Back Button -->
+  <button (click)="goBack()" class="back-btn">
+    ← Retour
+  </button>
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>🔔 Alertes & Notifications</h1>
+    <p class="subtitle" *ngIf="managerName">
+      Manager : <strong>{{ managerName }}</strong>
+    </p>
+    <p class="subtitle" *ngIf="!managerName">
+      Alertes qui vous sont destinées
+    </p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-state">
+    <p>⚠️ {{ error }}</p>
+    <button (click)="loadManagerAlertes()" class="btn-retry">Réessayer</button>
+  </div>
+
+  <!-- Stats Cards -->
+  <div *ngIf="!error" class="stats-grid">
+    <div class="stat-card stat-total">
+      <span class="stat-number">{{ stats.total }}</span>
+      <span class="stat-label">Total</span>
+    </div>
+    <div class="stat-card stat-attente">
+      <span class="stat-number">{{ stats.enAttente }}</span>
+      <span class="stat-label">En attente</span>
+    </div>
+    <div class="stat-card stat-envoyee">
+      <span class="stat-number">{{ stats.envoyee }}</span>
+      <span class="stat-label">Envoyées</span>
+    </div>
+    <div class="stat-card stat-lue">
+      <span class="stat-number">{{ stats.lue }}</span>
+      <span class="stat-label">Lues</span>
+    </div>
+    <div class="stat-card stat-traitee">
+      <span class="stat-number">{{ stats.traitee }}</span>
+      <span class="stat-label">Traitées</span>
+    </div>
+  </div>
+
+  <!-- Filters Toolbar -->
+  <div *ngIf="!error" class="filters-toolbar">
+    <div class="filter-group">
+      <label>Type</label>
+      <select [(ngModel)]="filterType" (ngModelChange)="onFilterChange()" class="filter-select">
+        <option value="all">Tous les types</option>
+        <option *ngFor="let type of alerteTypes" [value]="type.key">{{ type.icon }} {{ type.label }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Statut</label>
+      <select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()" class="filter-select">
+        <option value="all">Tous les statuts</option>
+        <option value="En attente">⏳ En attente</option>
+        <option value="Envoyée">📨 Envoyée</option>
+        <option value="Lue">👁️ Lue</option>
+        <option value="Traitée">✅ Traitée</option>
+      </select>
+    </div>
+
+    <div class="filter-group filter-search">
+      <label>Recherche</label>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onFilterChange()"
+        placeholder="Rechercher dans les alertes..."
+        class="filter-input"/>
+    </div>
+
+    <button *ngIf="filterType !== 'all' || filterStatus !== 'all' || searchQuery"
+            (click)="clearFilters()"
+            class="btn-clear-filters">
+      ✕ Réinitialiser
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des alertes...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && !error && filteredAlertes.length === 0" class="empty-state">
+    <div class="empty-icon">🔕</div>
+    <h3>Aucune alerte trouvée</h3>
+    <p *ngIf="alertes.length === 0">Aucune alerte n'a été envoyée à ce manager.</p>
+    <p *ngIf="alertes.length > 0">Aucune alerte ne correspond à vos filtres.</p>
+    <button *ngIf="alertes.length > 0" (click)="clearFilters()" class="btn-clear-filters">Réinitialiser les filtres</button>
+  </div>
+
+  <!-- Alertes List -->
+  <div *ngIf="!isLoading && !error && filteredAlertes.length > 0" class="alertes-list">
+    <div
+      *ngFor="let alerte of filteredAlertes"
+      class="alerte-card"
+      [ngClass]="getAlerteTypeClass(alerte.type)"
+      (click)="openViewModal(alerte)">
+
+      <div class="alerte-card-left">
+        <div class="alerte-icon-wrap">
+          <span class="alerte-type-icon">{{ getAlerteTypeIcon(alerte.type) }}</span>
+        </div>
+      </div>
+
+      <div class="alerte-card-body">
+        <div class="alerte-card-top">
+          <div class="alerte-meta">
+            <span class="alerte-type-label">{{ getAlerteTypeLabel(alerte.type) }}</span>
+            <span class="alerte-dot">·</span>
+            <span class="alerte-date">{{ formatDate(alerte.date) }}</span>
+          </div>
+          <span class="alerte-statut-badge" [ngClass]="getStatutClass(alerte.statut)">
+            {{ getStatutIcon(alerte.statut) }} {{ alerte.statut }}
+          </span>
+        </div>
+
+        <h4 class="alerte-titre">{{ alerte.titre }}</h4>
+
+        <p class="alerte-description" *ngIf="alerte.description">
+          {{ alerte.description.length > 120 ? (alerte.description | slice:0:120) + '...' : alerte.description }}
+        </p>
+
+        <!-- Quick Actions -->
+        <div class="alerte-quick-actions" (click)="$event.stopPropagation()">
+          <button
+            *ngIf="canAdvanceStatus(alerte.statut)"
+            (click)="advanceStatus(alerte, $event)"
+            class="btn-quick-action btn-advance">
+            {{ getNextStatusLabel(alerte.statut) }}
+          </button>
+          <button
+            *ngIf="alerte.statut === 'Envoyée'"
+            (click)="markAsRead(alerte, $event)"
+            class="btn-quick-action btn-read">
+            👁️ Marquer comme lue
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- VIEW ALERTE DETAILS MODAL                     -->
+<!-- ══════════════════════════════════════════════ -->
+<div *ngIf="showViewModal && selectedAlerte" class="modal-overlay" (click)="closeViewModal()">
+  <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header alerte-modal-header">
+      <h2>🔔 Détails de l'alerte</h2>
+      <button (click)="closeViewModal()" class="close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alerte-view-header" [ngClass]="getAlerteTypeClass(selectedAlerte.type)">
+        <span class="alerte-view-icon">{{ getAlerteTypeIcon(selectedAlerte.type) }}</span>
+        <div>
+          <p class="alerte-view-type">{{ getAlerteTypeLabel(selectedAlerte.type) }}</p>
+          <h3 class="alerte-view-titre">{{ selectedAlerte.titre }}</h3>
+        </div>
+        <span class="alerte-statut-badge ml-auto" [ngClass]="getStatutClass(selectedAlerte.statut)">
+          {{ getStatutIcon(selectedAlerte.statut) }} {{ selectedAlerte.statut }}
+        </span>
+      </div>
+
+      <div class="detail-grid" style="margin-top:1.25rem">
+        <div class="detail-item">
+          <label>📅 Date d'envoi</label>
+          <p>{{ formatDateTime(selectedAlerte.date) }}</p>
+        </div>
+        <div class="detail-item">
+          <label>👤 Envoyé par</label>
+          <p>{{ getCreatorLabel(selectedAlerte) }}</p>
+        </div>
+        <div class="detail-item">
+          <label>📬 Destinataire</label>
+          <p>{{ selectedAlerte.destination_label ?? '—' }}</p>
+        </div>
+
+        <div class="detail-item full-width" *ngIf="selectedAlerte.description">
+          <label>📝 Description</label>
+          <p class="description-box">{{ selectedAlerte.description }}</p>
+        </div>
+
+        <div class="detail-item full-width" *ngIf="selectedAlerte.managerNote">
+          <label>💼 Note pour le manager</label>
+          <p class="description-box manager-note-box">{{ selectedAlerte.managerNote }}</p>
+        </div>
+
+        <div class="detail-item full-width" *ngIf="selectedAlerte.keyPoints && selectedAlerte.keyPoints.length > 0">
+          <label>📌 Points clés</label>
+          <ul class="keypoints-view-list">
+            <li *ngFor="let kp of selectedAlerte.keyPoints">{{ kp }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Status Actions in Modal -->
+      <div class="modal-status-actions" *ngIf="canAdvanceStatus(selectedAlerte.statut)">
+        <button
+          *ngIf="selectedAlerte.statut === 'Envoyée'"
+          (click)="markAsRead(selectedAlerte, $event); closeViewModal()"
+          class="btn-modal-action btn-read">
+          👁️ Marquer comme lue
+        </button>
+        <button
+          (click)="advanceStatus(selectedAlerte, $event); closeViewModal()"
+          class="btn-modal-action btn-advance">
+          {{ getNextStatusLabel(selectedAlerte.statut) }}
+        </button>
+      </div>
+
+      <div class="modal-footer">
+        <button (click)="closeViewModal()" class="btn-primary">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

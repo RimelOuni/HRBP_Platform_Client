@@ -1,0 +1,174 @@
+<div class="page-wrapper">
+  <div class="form-card">
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement du point...</p>
+    </div>
+
+    <ng-container *ngIf="!isLoading">
+      <div class="form-card-header">
+        <div class="header-icon">✎</div>
+        <div>
+          <h1>Modifier le point</h1>
+          <p>Mettez à jour les informations ci-dessous</p>
+        </div>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" class="form-body">
+
+        <!-- TITRE (dropdown) + DATE -->
+        <div class="row-2">
+          <div class="field">
+            <label for="titre">Titre <span class="required">*</span></label>
+            <select
+              id="titre"
+              [(ngModel)]="form.titre"
+              name="titre"
+              required
+              class="input select">
+              <option value="">— Sélectionner un sujet —</option>
+              <optgroup
+                *ngFor="let group of titleCategories"
+                [label]="group.category">
+                <option *ngFor="let subject of group.subjects" [value]="subject">
+                  {{ subject }}
+                </option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="date">Date <span class="required">*</span></label>
+            <input
+              id="date"
+              type="date"
+              [(ngModel)]="form.date"
+              name="date"
+              required
+              class="input"
+              (change)="onDateChange()"
+            />
+          </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            [(ngModel)]="form.description"
+            name="description"
+            rows="4"
+            placeholder="Détails du point de suivi..."
+            class="input textarea"
+          ></textarea>
+        </div>
+
+        <!-- STATUS (auto-updated but still editable) + PRACTICE -->
+        <div class="row-2">
+          <div class="field">
+            <label for="status">
+              Statut
+              <span class="status-hint" *ngIf="form.date">
+                — mis à jour automatiquement selon la date
+              </span>
+            </label>
+            <select id="status" [(ngModel)]="form.status" name="status" class="input select">
+              <option value="En attente">En attente</option>
+              <option value="En cours">En cours</option>
+              <option value="Terminé">Terminé</option>
+              <option value="Reporté">Reporté</option>
+              <option value="Annulé">Annulé</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="practice">Practice</label>
+            <select id="practice" [(ngModel)]="form.practice_id" name="practice_id" class="input select">
+              <option value="">— Sélectionner une practice —</option>
+              <option *ngFor="let p of practices" [value]="p._id">{{ p.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- COLLABORATEUR + INVITÉ -->
+        <div class="row-2">
+          <div class="field">
+            <label for="collaborateur">Collaborateur</label>
+            <select id="collaborateur" [(ngModel)]="form.collaborateur" name="collaborateur" class="input select">
+              <option value="">— Sélectionner —</option>
+              <option *ngFor="let user of users" [value]="user._id">
+                {{ user.first_name }} {{ user.last_name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="invite">Invité</label>
+            <select id="invite" [(ngModel)]="form.invite" name="invite" class="input select">
+              <option value="">— Sélectionner —</option>
+              <option *ngFor="let user of users" [value]="user._id">
+                {{ user.first_name }} {{ user.last_name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- CRITICITÉ + DURÉE + FRÉQUENCE -->
+        <div class="row-3">
+          <div class="field">
+            <label for="criticite">Criticité</label>
+            <select id="criticite" [(ngModel)]="form.criticite" name="criticite" class="input select">
+              <option value="">— Choisir —</option>
+              <option value="Basse">🟢 Basse</option>
+              <option value="Moyenne">🟡 Moyenne</option>
+              <option value="Haute">🔴 Haute</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="duree">Durée estimée</label>
+            <select id="duree" [(ngModel)]="form.duree_estimee" name="duree" class="input select">
+              <option value="">— Choisir —</option>
+              <option value="15 min">15 min</option>
+              <option value="30 min">30 min</option>
+              <option value="1h">1h</option>
+              <option value="2h">2h</option>
+              <option value="Demi-journée">Demi-journée</option>
+              <option value="Journée">Journée</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="frequence">Fréquence</label>
+            <select id="frequence" [(ngModel)]="form.frequence" name="frequence" class="input select">
+              <option value="">— Choisir —</option>
+              <option value="Ponctuel">Ponctuel</option>
+              <option value="Hebdomadaire">Hebdomadaire</option>
+              <option value="Bimensuel">Bimensuel</option>
+              <option value="Chaque mois">Chaque mois</option>
+              <option value="Trimestriel">Trimestriel</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ERROR -->
+        <div *ngIf="errorMessage" class="error-msg">
+          ⚠️ {{ errorMessage }}
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="form-actions">
+          <button type="button" (click)="onCancel()" class="btn-cancel">Annuler</button>
+          <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+            <span *ngIf="!isSubmitting">Enregistrer les modifications</span>
+            <span *ngIf="isSubmitting" class="btn-spinner"></span>
+          </button>
+        </div>
+
+      </form>
+    </ng-container>
+  </div>
+</div>

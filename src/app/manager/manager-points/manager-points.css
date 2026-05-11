@@ -1,0 +1,792 @@
+/* ============================================================
+   MANAGER-POINTS — CSS COMPLET CORRIGÉ (FILTRES SUR UNE LIGNE)
+   ============================================================ */
+:root {
+  --mp-green:#16a34a; --mp-green-d:#15803d; --mp-green-l:#dcfce7;
+  --mp-amber:#d97706; --mp-amber-l:#fef3c7;
+  --mp-blue:#0284c7;  --mp-blue-l:#e0f2fe;
+  --mp-red:#dc2626;   --mp-red-l:#fee2e2;
+  --mp-star:#f59e0b;  --mp-star-l:#fffbeb;
+  --mp-border:#e5e7eb; --mp-bg:#f5f6f8; --mp-surf:#ffffff;
+  --mp-t1:#111827; --mp-t2:#6b7280; --mp-t3:#9ca3af;
+  --mp-r:12px;
+  --mp-sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --mp-shm:0 4px 16px rgba(0,0,0,.08);
+  --mp-t:.18s ease;
+  --mp-f:'Geist','DM Sans','Inter',system-ui,sans-serif;
+}
+app-manager-points { display:block; }
+
+/* ── Page ─────────────────────────────────────────────────── */
+app-manager-points .mp-page { padding:28px 32px 56px; font-family:var(--mp-f); color:var(--mp-t1); }
+
+app-manager-points .mp-header {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:16px; margin-bottom:20px; flex-wrap:wrap;
+}
+app-manager-points .mp-title { font-size:20px; font-weight:700; letter-spacing:-.3px; margin:0 0 4px; }
+app-manager-points .mp-sub   { font-size:13px; color:var(--mp-t3); margin:0; }
+
+app-manager-points .mp-btn-add {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--mp-green); color:#fff; border:none;
+  padding:10px 18px; border-radius:9px;
+  font-family:var(--mp-f); font-size:13.5px; font-weight:700; cursor:pointer;
+  box-shadow:0 2px 8px rgba(22,163,74,.25);
+  transition:background var(--mp-t),transform var(--mp-t); white-space:nowrap;
+}
+app-manager-points .mp-btn-add:hover { background:var(--mp-green-d); transform:translateY(-1px); }
+
+/* ── Onglets ──────────────────────────────────────────────── */
+app-manager-points .mp-tabs {
+  display:flex; gap:2px; border-bottom:2px solid var(--mp-border); margin-bottom:20px;
+}
+app-manager-points .mp-tab {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 16px; border:none; background:none;
+  font-family:var(--mp-f); font-size:13px; font-weight:600; color:var(--mp-t3);
+  cursor:pointer; border-radius:8px 8px 0 0; position:relative; bottom:-2px;
+  transition:color var(--mp-t),background var(--mp-t);
+}
+app-manager-points .mp-tab:hover { color:var(--mp-t1); background:var(--mp-bg); }
+app-manager-points .mp-tab-active { color:var(--mp-green); border-bottom:2px solid var(--mp-green); }
+
+app-manager-points .mp-tab-badge {
+  background:rgba(22,163,74,.12); color:var(--mp-green-d);
+  border-radius:20px; padding:1px 7px; font-size:11px; font-weight:700;
+}
+app-manager-points .mp-tab-badge-blue  { background:var(--mp-blue-l);  color:#075985; }
+app-manager-points .mp-tab-badge-amber { background:var(--mp-amber-l); color:#92400e; }
+
+/* ══ BARRE FILTRES — SUR UNE LIGNE ════════════════════════════ */
+app-manager-points .mp-filter-card {
+  background: var(--mp-surf);
+  border: 1px solid var(--mp-border);
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--mp-sh);
+}
+
+app-manager-points .mp-filter-card-header {
+  margin-bottom: 16px;
+}
+
+app-manager-points .mp-filter-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mp-t1);
+  margin: 0 0 2px;
+}
+
+app-manager-points .mp-filter-card-sub {
+  font-size: 12px;
+  color: var(--mp-t3);
+  margin: 0;
+}
+
+/* Grille sur UNE ligne avec 5 colonnes égales */
+app-manager-points .mp-filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
+app-manager-points .mp-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+app-manager-points .mp-filter-field-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--mp-t3);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  white-space: nowrap;
+}
+
+/* Input recherche */
+app-manager-points .mp-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+app-manager-points .mp-search-ico {
+  position: absolute;
+  left: 11px;
+  color: var(--mp-t3);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+app-manager-points .mp-search-input {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  border: 1.5px solid var(--mp-border);
+  border-radius: 9px;
+  font-family: var(--mp-f);
+  font-size: 13px;
+  color: var(--mp-t1);
+  background: var(--mp-bg);
+  outline: none;
+  transition: border-color var(--mp-t), box-shadow var(--mp-t), background var(--mp-t);
+  box-sizing: border-box;
+}
+app-manager-points .mp-search-input::placeholder { color: var(--mp-t3); }
+app-manager-points .mp-search-input:focus {
+  border-color: var(--mp-green);
+  background: var(--mp-surf);
+  box-shadow: 0 0 0 3px rgba(22,163,74,.09);
+}
+
+/* Input date */
+app-manager-points .mp-date-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+app-manager-points .mp-date-ico {
+  position: absolute;
+  left: 11px;
+  color: var(--mp-t3);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+app-manager-points .mp-filter-date {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  border: 1.5px solid var(--mp-border);
+  border-radius: 9px;
+  font-family: var(--mp-f);
+  font-size: 13px;
+  color: var(--mp-t1);
+  background: var(--mp-bg);
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--mp-t), box-shadow var(--mp-t), background var(--mp-t);
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+}
+app-manager-points .mp-filter-date:focus {
+  border-color: var(--mp-green);
+  background: var(--mp-surf);
+  box-shadow: 0 0 0 3px rgba(22,163,74,.09);
+}
+
+/* Selects */
+app-manager-points .mp-select-wrap {
+  position: relative;
+}
+
+app-manager-points .mp-select-chevron {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--mp-t3);
+  display: flex;
+  align-items: center;
+}
+
+app-manager-points .mp-filter-select {
+  width: 100%;
+  padding: 9px 30px 9px 12px;
+  border: 1.5px solid var(--mp-border);
+  border-radius: 9px;
+  font-family: var(--mp-f);
+  font-size: 13px;
+  color: var(--mp-t1);
+  background: var(--mp-bg);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color var(--mp-t), box-shadow var(--mp-t), background var(--mp-t);
+  box-sizing: border-box;
+}
+app-manager-points .mp-filter-select:focus {
+  border-color: var(--mp-green);
+  background: var(--mp-surf);
+  box-shadow: 0 0 0 3px rgba(22,163,74,.09);
+}
+app-manager-points .mp-filter-select.has-value {
+  border-color: var(--mp-green);
+  color: var(--mp-green-d);
+  font-weight: 600;
+  background: var(--mp-green-l);
+}
+
+/* Footer : tags actifs + actions */
+app-manager-points .mp-filter-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--mp-border);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+app-manager-points .mp-filter-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+app-manager-points .mp-filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px 3px 8px;
+  background: var(--mp-green-l);
+  color: var(--mp-green-d);
+  border: 1px solid #bbf7d0;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+app-manager-points .mp-filter-tag-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--mp-green-d);
+  display: flex;
+  align-items: center;
+  opacity: .7;
+  transition: opacity var(--mp-t);
+}
+app-manager-points .mp-filter-tag-remove:hover { opacity: 1; }
+
+app-manager-points .mp-filter-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+app-manager-points .mp-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border: 1.5px solid var(--mp-border);
+  border-radius: 9px;
+  background: var(--mp-surf);
+  font-family: var(--mp-f);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mp-t2);
+  cursor: pointer;
+  transition: all var(--mp-t);
+  white-space: nowrap;
+}
+app-manager-points .mp-sort-btn:hover {
+  border-color: var(--mp-green);
+  color: var(--mp-green);
+  background: var(--mp-green-l);
+}
+
+app-manager-points .mp-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border: 1.5px solid #fca5a5;
+  border-radius: 9px;
+  background: #fef2f2;
+  font-family: var(--mp-f);
+  font-size: 12px;
+  font-weight: 600;
+  color: #dc2626;
+  cursor: pointer;
+  transition: all var(--mp-t);
+  white-space: nowrap;
+}
+app-manager-points .mp-reset-btn:hover {
+  background: #fee2e2;
+  border-color: #dc2626;
+}
+
+/* ── Résultats info ─────────────────────────────────────── */
+app-manager-points .mp-results-info {
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  gap:8px; font-size:12px; color:var(--mp-t3); margin-bottom:14px; padding:0 4px;
+}
+app-manager-points .mp-results-info strong { color:var(--mp-t2); }
+
+app-manager-points .mp-pending-notice {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:11.5px; font-weight:600; color:#92400e;
+  background:var(--mp-amber-l); padding:4px 12px;
+  border-radius:20px; border:1px solid #fde68a;
+}
+app-manager-points .mp-dot-pending {
+  width:7px; height:7px; border-radius:50%;
+  background:var(--mp-amber); animation:mp-pulse 1.5s ease-in-out infinite; flex-shrink:0;
+}
+@keyframes mp-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+
+/* ── États ────────────────────────────────────────────────── */
+app-manager-points .mp-state {
+  display:flex; flex-direction:column; align-items:center;
+  gap:12px; padding:56px 20px; color:var(--mp-t3); text-align:center;
+}
+app-manager-points .mp-state-err { color:var(--mp-red); }
+app-manager-points .mp-empty-t { font-size:15px; font-weight:600; color:var(--mp-t2); margin:0; }
+app-manager-points .mp-empty-s { font-size:13px; color:var(--mp-t3); line-height:1.6; margin:0; }
+app-manager-points .mp-spin {
+  width:22px; height:22px;
+  border:2.5px solid var(--mp-border); border-top-color:var(--mp-green);
+  border-radius:50%; animation:mp-spin .65s linear infinite; display:inline-block;
+}
+@keyframes mp-spin { to{transform:rotate(360deg)} }
+app-manager-points .mp-btn-ghost {
+  display:inline-flex; align-items:center; gap:6px;
+  border:1px solid var(--mp-border); background:none;
+  padding:7px 16px; border-radius:8px;
+  font-family:var(--mp-f); font-size:13px; font-weight:600; color:var(--mp-t2); cursor:pointer;
+  transition:all var(--mp-t);
+}
+app-manager-points .mp-btn-ghost:hover { background:var(--mp-bg); color:var(--mp-t1); }
+
+/* ══ CARTES POINTS ═══════════════════════════════════════════ */
+app-manager-points .mp-list { display:flex; flex-direction:column; gap:12px; }
+app-manager-points .mp-card {
+  background:var(--mp-surf); border:1px solid var(--mp-border);
+  border-left:3px solid var(--mp-green); border-radius:var(--mp-r);
+  padding:16px 18px; box-shadow:var(--mp-sh);
+  transition:box-shadow var(--mp-t),transform var(--mp-t);
+}
+app-manager-points .mp-card:hover { box-shadow:var(--mp-shm); transform:translateY(-1px); }
+
+app-manager-points .mp-card-done      { border-left-color:var(--mp-green); background:#fafffe; }
+app-manager-points .mp-card-cancelled { border-left-color:#d1d5db; opacity:.8; }
+app-manager-points .mp-card-pending   { border-left-color:var(--mp-amber) !important; background:#fffdf7; }
+app-manager-points .mp-card-progress  { border-left-color:#3b82f6; }
+
+app-manager-points .mp-card-top {
+  display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:8px;
+}
+app-manager-points .mp-card-left { display:flex; align-items:flex-start; gap:10px; }
+app-manager-points .mp-card-ico {
+  width:34px; height:34px; border-radius:8px; flex-shrink:0;
+  background:var(--mp-green-l); color:var(--mp-green);
+  display:flex; align-items:center; justify-content:center;
+}
+app-manager-points .mp-card-ico-done     { background:var(--mp-green-l); color:var(--mp-green-d); }
+app-manager-points .mp-card-ico-pending  { background:var(--mp-amber-l) !important; color:var(--mp-amber) !important; }
+app-manager-points .mp-card-ico-progress { background:#eff6ff; color:#3b82f6; }
+
+app-manager-points .mp-card-title { font-size:14px; font-weight:700; color:var(--mp-t1); margin:0 0 3px; line-height:1.4; }
+app-manager-points .mp-card-freq  {
+  display:inline-flex; align-items:center;
+  font-size:11px; font-weight:600; color:var(--mp-t3);
+  background:var(--mp-bg); border:1px solid var(--mp-border);
+  padding:1px 8px; border-radius:20px;
+}
+app-manager-points .mp-card-desc  { font-size:13px; color:var(--mp-t2); line-height:1.6; margin:0 0 10px; }
+
+/* Status badges */
+app-manager-points .mp-s {
+  display:inline-flex; font-size:11.5px; font-weight:700;
+  padding:4px 10px; border-radius:20px; border:1px solid; white-space:nowrap; flex-shrink:0;
+}
+app-manager-points .mp-s-sm { font-size:10.5px; padding:2px 8px; }
+app-manager-points .mp-s-pending    { background:#fefce8; color:#92400e; border-color:#fde68a; }
+app-manager-points .mp-s-progress   { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+app-manager-points .mp-s-done       { background:var(--mp-green-l); color:var(--mp-green-d); border-color:#bbf7d0; }
+app-manager-points .mp-s-cancelled  { background:#f3f4f6; color:#6b7280; border-color:var(--mp-border); }
+
+/* Meta */
+app-manager-points .mp-meta { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:12px; }
+app-manager-points .mp-meta-i { display:inline-flex; align-items:center; gap:4px; font-size:11.5px; color:var(--mp-t3); }
+app-manager-points .mp-meta-hrbp  { color:var(--mp-blue); font-weight:500; }
+app-manager-points .mp-meta-amber { color:var(--mp-amber); font-weight:500; }
+app-manager-points .mp-crit       { font-weight:600; }
+app-manager-points .mp-crit-low   { color:var(--mp-green); }
+app-manager-points .mp-crit-med   { color:var(--mp-amber); }
+app-manager-points .mp-crit-high  { color:var(--mp-red); }
+
+/* Footer carte */
+app-manager-points .mp-card-foot {
+  padding-top:10px; border-top:1px solid var(--mp-border);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+
+/* Bouton Réclamer */
+app-manager-points .mp-btn-reclam {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--mp-amber-l); color:#92400e;
+  border:1px solid #fde68a; padding:7px 14px; border-radius:8px;
+  font-family:var(--mp-f); font-size:12.5px; font-weight:700; cursor:pointer;
+  transition:all var(--mp-t);
+}
+app-manager-points .mp-btn-reclam:hover { background:#fde68a; transform:translateY(-1px); }
+
+app-manager-points .mp-pending-reclam {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11.5px; font-weight:600;
+  background:var(--mp-amber-l); color:#92400e; padding:4px 10px; border-radius:20px;
+}
+
+/* Bouton Satisfaction */
+app-manager-points .mp-btn-sat {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--mp-star-l); color:#b45309;
+  border:1px solid #fde68a; padding:7px 14px; border-radius:8px;
+  font-family:var(--mp-f); font-size:12.5px; font-weight:700; cursor:pointer;
+  transition:all var(--mp-t);
+}
+app-manager-points .mp-btn-sat:hover {
+  background:#fef3c7; border-color:var(--mp-star); transform:translateY(-1px);
+  box-shadow:0 2px 8px rgba(245,158,11,.2);
+}
+app-manager-points .mp-btn-sat svg { color:var(--mp-star); stroke:var(--mp-star); }
+
+app-manager-points .mp-sat-done {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:12px; font-weight:700;
+  background:var(--mp-star-l); color:#b45309;
+  border:1px solid #fde68a; padding:5px 12px; border-radius:20px;
+}
+app-manager-points .mp-sat-done svg { stroke:var(--mp-star); fill:var(--mp-star); }
+
+/* ══ CARTES MESSAGES ═════════════════════════════════════════ */
+app-manager-points .mp-msg-list { display:flex; flex-direction:column; gap:12px; }
+app-manager-points .mp-msg-card {
+  background:var(--mp-surf); border:1px solid var(--mp-border);
+  border-left:3px solid var(--mp-blue); border-radius:var(--mp-r);
+  padding:0; overflow:hidden; box-shadow:var(--mp-sh);
+  transition:box-shadow var(--mp-t);
+}
+app-manager-points .mp-msg-card:hover    { box-shadow:var(--mp-shm); }
+app-manager-points .mp-msg-card-amber    { border-left-color:var(--mp-amber); }
+app-manager-points .mp-msg-card-pending  { border-left-color:var(--mp-amber); }
+app-manager-points .mp-msg-card-done     { border-left-color:var(--mp-green); }
+app-manager-points .mp-msg-card-rejected { border-left-color:#9ca3af; }
+
+app-manager-points .mp-msg-head {
+  display:flex; align-items:flex-start; gap:10px; padding:14px 16px 0; justify-content:space-between;
+}
+app-manager-points .mp-msg-ico {
+  width:34px; height:34px; border-radius:8px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+app-manager-points .mp-msg-ico-blue  { background:var(--mp-blue-l);  color:var(--mp-blue); }
+app-manager-points .mp-msg-ico-amber { background:var(--mp-amber-l); color:var(--mp-amber); }
+
+app-manager-points .mp-msg-info { flex:1; min-width:0; }
+app-manager-points .mp-msg-title { font-size:14px; font-weight:700; color:var(--mp-t1); margin:0 0 4px; line-height:1.4; }
+app-manager-points .mp-msg-meta { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+app-manager-points .mp-msg-body { font-size:13px; color:var(--mp-t2); line-height:1.6; margin:8px 16px 0; }
+
+/* Badge statut message */
+app-manager-points .mp-b {
+  display:inline-flex; font-size:11px; font-weight:700;
+  padding:3px 9px; border-radius:20px; border:1px solid; white-space:nowrap; flex-shrink:0;
+}
+app-manager-points .mp-b-pending  { background:#fefce8; color:#92400e; border-color:#fde68a; }
+app-manager-points .mp-b-done     { background:var(--mp-green-l); color:var(--mp-green-d); border-color:#bbf7d0; }
+app-manager-points .mp-b-rejected { background:#f3f4f6; color:#6b7280; border-color:var(--mp-border); }
+
+/* Snapshot */
+app-manager-points .mp-snapshot {
+  margin:10px 16px 0; background:var(--mp-bg);
+  border:1px solid var(--mp-border); border-radius:8px; padding:10px 12px;
+}
+app-manager-points .mp-snapshot-lbl {
+  font-size:10.5px; font-weight:700; color:var(--mp-t3);
+  text-transform:uppercase; letter-spacing:.4px; margin:0 0 7px;
+}
+app-manager-points .mp-snapshot-grid { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; align-items:center; }
+app-manager-points .mp-snapshot-k { font-size:11.5px; color:var(--mp-t3); white-space:nowrap; }
+app-manager-points .mp-snapshot-v { font-size:12px; font-weight:600; color:var(--mp-t2); }
+
+/* Statut détaillé */
+app-manager-points .mp-msg-status-detail { padding:10px 16px; }
+app-manager-points .mp-status-info {
+  display:inline-flex; align-items:center; gap:7px;
+  font-size:12.5px; padding:7px 11px; border-radius:8px; width:100%; box-sizing:border-box;
+}
+app-manager-points .mp-status-info-pending  { background:#fefce8; color:#92400e; }
+app-manager-points .mp-status-info-done     { background:var(--mp-green-l); color:var(--mp-green-d); }
+app-manager-points .mp-status-info-rejected { background:#f3f4f6; color:#6b7280; }
+
+/* Réponse HRBP */
+app-manager-points .mp-hrbp-reply {
+  display:flex; align-items:flex-start; gap:7px;
+  margin:0 16px 14px; padding:8px 11px; border-radius:8px;
+  background:var(--mp-blue-l); color:#075985; font-size:12.5px; line-height:1.5;
+}
+
+/* ══ MODALS ═══════════════════════════════════════════════════ */
+.mp-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center;
+  z-index:9999; padding:20px; animation:mp-fade .2s ease;
+}
+@keyframes mp-fade { from{opacity:0} to{opacity:1} }
+
+.mp-modal {
+  background:var(--mp-surf); border-radius:16px; width:100%; max-width:480px;
+  box-shadow:0 20px 60px rgba(0,0,0,.15),0 0 0 1px rgba(0,0,0,.05);
+  overflow:hidden; animation:mp-slide .3s cubic-bezier(.16,1,.3,1);
+}
+.mp-modal-wide { max-width:540px; }
+@keyframes mp-slide { from{transform:translateY(18px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+.mp-modal-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 22px; border-bottom:1px solid var(--mp-border);
+}
+.mp-modal-head-l { display:flex; align-items:center; gap:11px; }
+.mp-modal-ico {
+  width:38px; height:38px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.mp-modal-ico-green { background:var(--mp-green-l); }
+.mp-modal-ico-amber { background:var(--mp-amber-l); }
+.mp-modal-ico-star  { background:var(--mp-star-l); }
+
+.mp-modal-title { font-size:14.5px; font-weight:700; color:var(--mp-t1); margin:0 0 2px; }
+.mp-modal-sub   { font-size:12px; color:var(--mp-t3); margin:0; }
+.mp-modal-close {
+  width:30px; height:30px; border:none; background:none; border-radius:7px; cursor:pointer;
+  color:var(--mp-t3); display:flex; align-items:center; justify-content:center; transition:all var(--mp-t);
+}
+.mp-modal-close:hover { background:var(--mp-bg); color:var(--mp-t1); }
+.mp-modal-ok {
+  display:flex; flex-direction:column; align-items:center;
+  gap:10px; padding:36px 24px; text-align:center;
+  font-size:14px; font-weight:600; color:var(--mp-green-d);
+}
+.mp-modal-body {
+  padding:20px 22px; display:flex; flex-direction:column; gap:14px; max-height:68vh; overflow-y:auto;
+}
+
+/* Étoiles satisfaction */
+.mp-sat-question { font-size:14px; font-weight:600; color:var(--mp-t2); text-align:center; margin:0; }
+.mp-sat-stars { display:flex; justify-content:center; gap:8px; margin:4px 0; }
+.mp-star-btn {
+  background:none; border:none; cursor:pointer; padding:4px;
+  border-radius:6px; transition:transform .15s, background .15s; color:var(--mp-border);
+}
+.mp-star-btn:hover { transform:scale(1.2); background:var(--mp-star-l); }
+.mp-star-btn svg { display:block; }
+.mp-star-active { color:var(--mp-star); }
+.mp-star-active svg { stroke:var(--mp-star); fill:var(--mp-star); }
+.mp-sat-label { text-align:center; font-size:13px; font-weight:600; color:var(--mp-amber); margin:0; transition:opacity .2s; }
+
+/* Contexte point */
+.mp-point-ctx { display:flex; flex-direction:column; gap:6px; }
+.mp-ctx-lbl { font-size:11px; font-weight:700; color:var(--mp-t3); text-transform:uppercase; letter-spacing:.5px; margin:0; }
+.mp-ctx-card {
+  background:var(--mp-bg); border:1px solid var(--mp-border);
+  border-left:3px solid var(--mp-amber); border-radius:9px;
+  padding:10px 14px; display:flex; flex-direction:column; gap:6px;
+}
+.mp-ctx-row { display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--mp-t2); }
+
+.mp-field { display:flex; flex-direction:column; gap:6px; }
+.mp-lbl   { font-size:11px; font-weight:700; color:var(--mp-t3); text-transform:uppercase; letter-spacing:.5px; }
+.mp-opt   { font-size:10px; font-weight:400; color:var(--mp-t3); text-transform:none; margin-left:4px; }
+.mp-inp, .mp-ta {
+  border:1px solid var(--mp-border); border-radius:9px; padding:10px 12px;
+  font-family:var(--mp-f); font-size:13.5px; color:var(--mp-t1);
+  background:var(--mp-bg); outline:none; width:100%; box-sizing:border-box;
+  transition:border-color var(--mp-t),box-shadow var(--mp-t); resize:vertical;
+}
+.mp-inp-date { cursor:pointer; }
+.mp-inp:focus, .mp-ta:focus {
+  border-color:var(--mp-green); background:var(--mp-surf);
+  box-shadow:0 0 0 3px rgba(22,163,74,.1);
+}
+.mp-inp::placeholder, .mp-ta::placeholder { color:var(--mp-t3); }
+
+.mp-modal-foot {
+  display:flex; gap:10px; padding:14px 22px;
+  border-top:1px solid var(--mp-border); background:var(--mp-bg); justify-content:flex-end;
+}
+.mp-btn-cancel {
+  display:inline-flex; align-items:center; padding:8px 16px;
+  border:1px solid var(--mp-border); background:var(--mp-surf); border-radius:8px;
+  font-family:var(--mp-f); font-size:13px; font-weight:600; color:var(--mp-t2); cursor:pointer;
+  transition:all var(--mp-t);
+}
+.mp-btn-cancel:hover { background:var(--mp-bg); color:var(--mp-t1); }
+
+.mp-btn-green, .mp-btn-amber, .mp-btn-star {
+  display:inline-flex; align-items:center; gap:6px; padding:8px 20px;
+  border:none; border-radius:8px;
+  font-family:var(--mp-f); font-size:13px; font-weight:700; cursor:pointer; transition:all var(--mp-t);
+}
+.mp-btn-green { background:var(--mp-green); color:#fff; box-shadow:0 2px 8px rgba(22,163,74,.2); }
+.mp-btn-green:hover { background:var(--mp-green-d); transform:translateY(-1px); }
+.mp-btn-amber { background:var(--mp-amber); color:#fff; box-shadow:0 2px 8px rgba(217,119,6,.2); }
+.mp-btn-amber:hover { background:#b45309; transform:translateY(-1px); }
+.mp-btn-star  { background:var(--mp-star); color:#fff; box-shadow:0 2px 8px rgba(245,158,11,.25); }
+.mp-btn-star:hover:not(:disabled) { background:#d97706; transform:translateY(-1px); }
+
+.mp-btn-green:disabled, .mp-btn-amber:disabled, .mp-btn-star:disabled {
+  background:var(--mp-border); color:var(--mp-t3); box-shadow:none; cursor:not-allowed; transform:none;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  app-manager-points .mp-filter-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 900px) {
+  app-manager-points .mp-filter-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  app-manager-points .mp-page   { padding:16px 18px 48px; }
+  app-manager-points .mp-header { flex-direction:column; align-items:flex-start; }
+  app-manager-points .mp-card-top { flex-direction:column; }
+  app-manager-points .mp-tabs  { overflow-x:auto; }
+  app-manager-points .mp-filter-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  app-manager-points .mp-filter-card {
+    padding: 16px;
+  }
+  .mp-modal-foot { flex-direction:column-reverse; }
+  .mp-btn-cancel, .mp-btn-green, .mp-btn-amber, .mp-btn-star { width:100%; justify-content:center; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SÉPARATEURS DE GROUPES (à ajouter dans cp et mp)
+══════════════════════════════════════════════════════════ */
+
+/* Pour collab (cp-) */
+app-collab-points .cp-group-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 10px;
+}
+
+app-collab-points .cp-group-divider::before,
+app-collab-points .cp-group-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--cp-border);
+}
+
+app-collab-points .cp-group-divider-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid;
+}
+
+app-collab-points .cp-group-divider-done {
+  color: var(--cp-green-d);
+  background: var(--cp-green-l);
+  border-color: #bbf7d0;
+}
+
+app-collab-points .cp-group-divider-rejected {
+  color: #6b7280;
+  background: #f3f4f6;
+  border-color: var(--cp-border);
+}
+
+app-collab-points .cp-list-faded {
+  opacity: 0.75;
+}
+
+app-collab-points .cp-list-faded .cp-msg-card {
+  background: #fafafa;
+}
+
+app-collab-points .cp-list-rejected .cp-msg-card {
+  background: #fafafa;
+  border-left-color: #9ca3af !important;
+}
+
+/* Pour manager (mp-) — même chose avec préfixe mp */
+app-manager-points .mp-group-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 10px;
+}
+
+app-manager-points .mp-group-divider::before,
+app-manager-points .mp-group-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--mp-border);
+}
+
+app-manager-points .mp-group-divider-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid;
+}
+
+app-manager-points .mp-group-divider-done {
+  color: var(--mp-green-d);
+  background: var(--mp-green-l);
+  border-color: #bbf7d0;
+}
+
+app-manager-points .mp-group-divider-rejected {
+  color: #6b7280;
+  background: #f3f4f6;
+  border-color: var(--mp-border);
+}
+
+app-manager-points .mp-list-faded {
+  opacity: 0.75;
+}
+
+app-manager-points .mp-list-faded .mp-msg-card {
+  background: #fafafa;
+}
+
+app-manager-points .mp-list-rejected .mp-msg-card {
+  background: #fafafa;
+  border-left-color: #9ca3af !important;
+}
